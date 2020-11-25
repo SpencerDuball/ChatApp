@@ -12,7 +12,7 @@ import {
   InputGroup,
   Button,
 } from "@chakra-ui/react";
-import { IoMdPerson, IoMdPeople, IoMdKey, IoMdAt } from "react-icons/io";
+import { IoMdKey, IoMdAt } from "react-icons/io";
 import BackgroundIllustrations from "components/svg/BackgroundIllustrations";
 import ChatAppLogo from "components/svg/ChatAppLogo";
 import NextLink from "next/link";
@@ -100,7 +100,7 @@ const SignIn = () => {
                   borderStyle="solid"
                   borderColor="brand.gray.100"
                   name="password"
-                  autoComplete="new-password"
+                  autoComplete="current-password"
                   isInvalid={!!errors.password}
                   errorBorderColor="brand.red.600"
                   ref={register({ required: true, minLength: 8 })}
