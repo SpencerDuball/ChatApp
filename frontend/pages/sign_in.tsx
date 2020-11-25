@@ -22,26 +22,24 @@ import { useForm } from "react-hook-form";
 const minH = "500px";
 
 // types/interfaces
-interface SignUpInputs {
-  given_name: string;
-  family_name: string;
+interface SignInInputs {
   email: string;
   password: string;
 }
 
-const SignUp = () => {
+const SignIn = () => {
   // control show/hide password input field
   const [showPassword, setShowPassword] = useState(false);
   const toggleShowPassword = () => setShowPassword(!showPassword);
 
   // control form
-  const { register, handleSubmit, errors } = useForm<SignUpInputs>();
-  const onSignUp = (data: SignUpInputs) => console.log(data);
+  const { register, handleSubmit, errors } = useForm<SignInInputs>();
+  const onSignIn = (data: SignInInputs) => console.log(data);
 
   return (
     <>
       <Head>
-        <title>ChatApp | Sign Up</title>
+        <title>ChatApp | Sign In</title>
       </Head>
       <Box as="main" h="100vh" w="100%" position="relative" minH={minH}>
         <BackgroundIllustrations
@@ -73,40 +71,8 @@ const SignUp = () => {
               gridAutoFlow="row"
               w={["250px", "300px"]}
               gridGap={1}
-              onSubmit={handleSubmit(onSignUp)}
+              onSubmit={handleSubmit(onSignIn)}
             >
-              <InputGroup>
-                <InputLeftElement
-                  children={<Icon as={IoMdPerson} color="brand.gray.900" />}
-                />
-                <Input
-                  placeholder="First name"
-                  bgColor="white"
-                  borderStyle="solid"
-                  borderColor="brand.gray.100"
-                  name="given_name"
-                  autoComplete="given-name"
-                  errorBorderColor="brand.red.600"
-                  ref={register({ required: true })}
-                  isInvalid={!!errors.given_name}
-                ></Input>
-              </InputGroup>
-              <InputGroup>
-                <InputLeftElement
-                  children={<Icon as={IoMdPeople} color="brand.gray.900" />}
-                />
-                <Input
-                  placeholder="Last name"
-                  bgColor="white"
-                  borderStyle="solid"
-                  borderColor="brand.gray.100"
-                  name="family_name"
-                  autoComplete="family-name"
-                  errorBorderColor="brand.red.600"
-                  isInvalid={!!errors.family_name}
-                  ref={register({ required: true })}
-                ></Input>
-              </InputGroup>
               <InputGroup>
                 <InputLeftElement
                   children={<Icon as={IoMdAt} color="brand.gray.900" />}
@@ -159,12 +125,12 @@ const SignUp = () => {
                   bgColor: "brand.red.300",
                 }}
               >
-                Sign Up
+                Sign In
               </Button>
             </Grid>
           </Grid>
         </Center>
-        <NextLink href="/sign_in" passHref>
+        <NextLink href="/sign_up" passHref>
           <Link
             position="absolute"
             bottom={5}
@@ -178,7 +144,7 @@ const SignUp = () => {
               textDecoration: "none",
             }}
           >
-            Sign In
+            Sign Up
           </Link>
         </NextLink>
       </Box>
@@ -186,4 +152,4 @@ const SignUp = () => {
   );
 };
 
-export default SignUp;
+export default SignIn;
