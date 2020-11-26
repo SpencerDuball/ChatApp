@@ -40,6 +40,7 @@ const SignIn = () => {
 
   // modal
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [username, setUsername] = useState("");
 
   // add toast
   const toast = useToast();
@@ -79,6 +80,9 @@ const SignIn = () => {
       // redirect to /app
       router.push("/messenger");
     } catch (error) {
+      // set username for modal
+      setUsername(data.email);
+
       switch (error.code) {
         // present user with modal to confirm email
         case "UserNotConfirmedException": {
@@ -98,11 +102,19 @@ const SignIn = () => {
         }
       }
     }
+
+    // clear the form
+    e.target.reset();
   };
 
   return (
     <>
-      <ConfirmUserModal isOpen={isOpen} onOpen={onOpen} onClose={onClose} />
+      <ConfirmUserModal
+        isOpen={isOpen}
+        onOpen={onOpen}
+        onClose={onClose}
+        username={username}
+      />
       <Head>
         <title>ChatApp | Sign In</title>
       </Head>

@@ -1,5 +1,4 @@
-import { BaseSyntheticEvent } from "react";
-import { useState, useContext } from "react";
+import { BaseSyntheticEvent, useState, useContext } from "react";
 import { AuthContext, setCognitoUser } from "context/auth-context/AuthContext";
 import Head from "next/head";
 import {
@@ -14,6 +13,7 @@ import {
   InputGroup,
   Button,
   useToast,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { IoMdPerson, IoMdPeople, IoMdKey, IoMdAt } from "react-icons/io";
 import BackgroundIllustrations from "components/svg/BackgroundIllustrations";
@@ -22,6 +22,7 @@ import NextLink from "next/link";
 import { useForm } from "react-hook-form";
 import { Auth } from "aws-amplify";
 import { useRouter } from "next/router";
+import ConfirmUserModal from "components/modal/ConfirmUserModal";
 
 // constants
 const minH = "500px";
@@ -38,6 +39,10 @@ const SignUp = () => {
   // control show/hide password input field
   const [showPassword, setShowPassword] = useState(false);
   const toggleShowPassword = () => setShowPassword(!showPassword);
+
+  // modal
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [username, setUsername] = useState("");
 
   // add toast
   const toast = useToast();
@@ -68,8 +73,9 @@ const SignUp = () => {
       // save cognito user
       setCognitoUser(dispatch, signUpResult.user);
 
-      // redirect to /app
-      router.push("/messenger");
+      // open confirm user modal
+      setUsername(data.email);
+      onOpen();
     } catch (error) {
       toast({
         title: error.code,
@@ -80,10 +86,19 @@ const SignUp = () => {
         position: "top",
       });
     }
+
+    // reset the form
+    e.target.reset();
   };
 
   return (
     <>
+      <ConfirmUserModal
+        isOpen={isOpen}
+        onOpen={onOpen}
+        onClose={onClose}
+        username={username}
+      />
       <Head>
         <title>ChatApp | Sign Up</title>
       </Head>

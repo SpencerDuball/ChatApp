@@ -10,21 +10,28 @@ import {
   Center,
   Button,
   Grid,
-  Input,
+  HStack,
+  PinInput,
+  PinInputField,
   useToast,
 } from "@chakra-ui/react";
 import { useForm } from "react-hook-form";
 import { Auth } from "aws-amplify";
 
 interface IConfirmEmailInput {
-  confirmation_code: string;
-  email: string;
+  otc_1: string;
+  otc_2: string;
+  otc_3: string;
+  otc_4: string;
+  otc_5: string;
+  otc_6: string;
 }
 
 const ConfirmUserModal = (props: {
   isOpen: boolean;
   onOpen: () => void;
   onClose: () => void;
+  username: string;
 }) => {
   const { register, handleSubmit, errors } = useForm<IConfirmEmailInput>();
   const toast = useToast();
@@ -36,8 +43,8 @@ const ConfirmUserModal = (props: {
     try {
       // confirm email
       const confirmSignUp = await Auth.confirmSignUp(
-        data.email,
-        data.confirmation_code
+        props.username,
+        `${data.otc_1}${data.otc_2}${data.otc_3}${data.otc_4}${data.otc_5}${data.otc_6}`
       );
 
       // close modal
@@ -73,65 +80,67 @@ const ConfirmUserModal = (props: {
         <ModalCloseButton />
         <ModalBody>
           <Center h="100%" w="100%">
-            <Grid
+            <HStack
               as="form"
-              gridAutoFlow="row"
-              w={["250px", "300px"]}
-              gridGap={1}
               onSubmit={handleSubmit(onConfirmEmail)}
+              id="confirmCodeForm"
             >
-              <Input
-                placeholder="Email"
-                bgColor="white"
-                borderStyle="solid"
-                borderColor="brand.gray.100"
-                name="email"
-                autoComplete="email"
-                errorBorderColor="brand.red.600"
-                ref={register({
-                  required: true,
-                  pattern: /\S+@\S+\.\S+/,
-                })}
-              />
-              <Input
-                placeholder="Confirmation code"
-                bgColor="white"
-                borderStyle="solid"
-                borderColor="brand.gray.100"
-                name="confirmation_code"
-                autoComplete="one-time-code"
-                errorBorderColor="brand.red.600"
-                ref={register({
-                  required: true,
-                  minLength: 6,
-                  maxLength: 6,
-                  pattern: /[0-9]{6}/,
-                })}
-              />
-              <Button
-                mt={1}
-                bgColor="brand.red.200"
-                color="brand.gray.700"
-                type="submit"
-                _hover={{
-                  bgColor: "brand.red.300",
-                }}
-              >
-                Confirm Email
-              </Button>
-            </Grid>
+              <PinInput>
+                <PinInputField
+                  name="otc_1"
+                  ref={register({ required: true, minLength: 1, maxLength: 1 })}
+                  errorBorderColor="brand.red.600"
+                />
+                <PinInputField
+                  name="otc_2"
+                  ref={register({ required: true, minLength: 1, maxLength: 1 })}
+                  errorBorderColor="brand.red.600"
+                />
+                <PinInputField
+                  name="otc_3"
+                  ref={register({ required: true, minLength: 1, maxLength: 1 })}
+                  errorBorderColor="brand.red.600"
+                />
+                <PinInputField
+                  name="otc_4"
+                  ref={register({ required: true, minLength: 1, maxLength: 1 })}
+                  errorBorderColor="brand.red.600"
+                />
+                <PinInputField
+                  name="otc_5"
+                  ref={register({ required: true, minLength: 1, maxLength: 1 })}
+                  errorBorderColor="brand.red.600"
+                />
+                <PinInputField
+                  name="otc_6"
+                  ref={register({ required: true, minLength: 1, maxLength: 1 })}
+                  errorBorderColor="brand.red.600"
+                />
+              </PinInput>
+            </HStack>
           </Center>
         </ModalBody>
         <ModalFooter>
-          <Center h="100%" w="100%">
+          <HStack justify="flex-end">
             <Button
               bgColor="white"
               borderStyle="solid"
               borderColor="brand.gray.100"
             >
-              Resend Code
+              Resend
             </Button>
-          </Center>
+            <Button
+              bgColor="brand.red.200"
+              color="brand.gray.700"
+              type="submit"
+              form="confirmCodeForm"
+              _hover={{
+                bgColor: "brand.red.300",
+              }}
+            >
+              Submit
+            </Button>
+          </HStack>
         </ModalFooter>
       </ModalContent>
     </Modal>
