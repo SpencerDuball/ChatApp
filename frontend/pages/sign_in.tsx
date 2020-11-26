@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, BaseSyntheticEvent, useContext } from "react";
+import { AuthContext, setCognitoUser } from "context/auth-context/AuthContext";
 import Head from "next/head";
 import {
   Box,
@@ -11,12 +12,16 @@ import {
   InputRightElement,
   InputGroup,
   Button,
+  useToast,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { IoMdKey, IoMdAt } from "react-icons/io";
 import BackgroundIllustrations from "components/svg/BackgroundIllustrations";
 import ChatAppLogo from "components/svg/ChatAppLogo";
 import NextLink from "next/link";
 import { useForm } from "react-hook-form";
+import { Auth } from "aws-amplify";
+import ConfirmUserModal from "components/modal/ConfirmUserModal";
 
 // constants
 const minH = "500px";
@@ -32,12 +37,61 @@ const SignIn = () => {
   const [showPassword, setShowPassword] = useState(false);
   const toggleShowPassword = () => setShowPassword(!showPassword);
 
+  // modal disclosure
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  // add toast
+  const toast = useToast();
+
+  // auth context
+  const [, dispatch] = useContext(AuthContext);
+
   // control form
   const { register, handleSubmit, errors } = useForm<SignInInputs>();
-  const onSignIn = (data: SignInInputs) => console.log(data);
+  const onSignIn = async (
+    data: SignInInputs,
+    e: BaseSyntheticEvent<HTMLFormElement>
+  ) => {
+    try {
+      // initiate sign in
+      const signInResult = await Auth.signIn({
+        username: data.email,
+        password: data.password,
+      });
+
+      // save cognito user
+      setCognitoUser(dispatch, signInResult.user);
+
+      // redirect to /app
+      // TODO
+    } catch (error) {
+      switch (error.code) {
+        // present user with modal to confirm email
+        case "UserNotConfirmedException": {
+          onOpen();
+          break;
+        }
+
+        default: {
+          toast({
+            title: error.code,
+            description: error.message,
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+            position: "top",
+          });
+        }
+      }
+    }
+
+    // clear the form
+    e.target.reset();
+  };
 
   return (
     <>
+      <ConfirmUserModal isOpen={isOpen} onOpen={onOpen} onClose={onClose} />
       <Head>
         <title>ChatApp | Sign In</title>
       </Head>

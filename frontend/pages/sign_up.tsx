@@ -1,5 +1,6 @@
 import { BaseSyntheticEvent } from "react";
-import { useState } from "react";
+import { useState, useContext } from "react";
+import { AuthContext, setCognitoUser } from "context/auth-context/AuthContext";
 import Head from "next/head";
 import {
   Box,
@@ -40,6 +41,9 @@ const SignUp = () => {
   // add toast
   const toast = useToast();
 
+  // collect auth context
+  const [, dispatch] = useContext(AuthContext);
+
   // control form
   const { register, handleSubmit, errors } = useForm<SignUpInputs>();
   const onSignUp = async (
@@ -56,6 +60,12 @@ const SignUp = () => {
           given_name: data.given_name,
         },
       });
+
+      // save cognito user
+      setCognitoUser(dispatch, signUpResult.user);
+
+      // redirect to /app
+      // TODO
     } catch (error) {
       toast({
         title: error.code,
