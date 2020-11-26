@@ -1,6 +1,7 @@
 import { useState, BaseSyntheticEvent, useContext } from "react";
 import { AuthContext, setCognitoUser } from "context/auth-context/AuthContext";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import {
   Box,
   Center,
@@ -46,6 +47,9 @@ const SignIn = () => {
   // auth context
   const [, dispatch] = useContext(AuthContext);
 
+  // router
+  const router = useRouter();
+
   // control form
   const { register, handleSubmit, errors } = useForm<SignInInputs>();
   const onSignIn = async (
@@ -62,8 +66,18 @@ const SignIn = () => {
       // save cognito user
       setCognitoUser(dispatch, signInResult.user);
 
+      // toast sign in
+      toast({
+        title: "Sign In Successful",
+        description: "Welcome back to ChatApp!",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+        position: "top",
+      });
+
       // redirect to /app
-      // TODO
+      router.push("/messenger");
     } catch (error) {
       switch (error.code) {
         // present user with modal to confirm email

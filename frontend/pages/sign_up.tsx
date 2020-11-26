@@ -21,6 +21,7 @@ import ChatAppLogo from "components/svg/ChatAppLogo";
 import NextLink from "next/link";
 import { useForm } from "react-hook-form";
 import { Auth } from "aws-amplify";
+import { useRouter } from "next/router";
 
 // constants
 const minH = "500px";
@@ -44,6 +45,9 @@ const SignUp = () => {
   // collect auth context
   const [, dispatch] = useContext(AuthContext);
 
+  // router
+  const router = useRouter();
+
   // control form
   const { register, handleSubmit, errors } = useForm<SignUpInputs>();
   const onSignUp = async (
@@ -65,7 +69,7 @@ const SignUp = () => {
       setCognitoUser(dispatch, signUpResult.user);
 
       // redirect to /app
-      // TODO
+      router.push("/messenger");
     } catch (error) {
       toast({
         title: error.code,

@@ -18,6 +18,7 @@ import { Auth, toast } from "aws-amplify";
 
 interface IConfirmEmailInput {
   confirmation_code: string;
+  email: string;
 }
 
 const ConfirmUserModal = (props: {
@@ -25,13 +26,8 @@ const ConfirmUserModal = (props: {
   onOpen: () => void;
   onClose: () => void;
 }) => {
-  // form
   const { register, handleSubmit, errors } = useForm<IConfirmEmailInput>();
-
-  // toast
   const toast = useToast();
-
-  // context
 
   const onConfirmEmail = async (
     data: IConfirmEmailInput,
@@ -39,7 +35,21 @@ const ConfirmUserModal = (props: {
   ) => {
     try {
       // confirm email
-      // const confirmSignUp = await Auth.confirmSignUp()
+      const confirmSignUp = await Auth.confirmSignUp(
+        data.email,
+        data.confirmation_code
+      );
+
+      // close modal
+      toast({
+        title: "Account Confirmed",
+        description: "Your email has been confirmed.",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+        position: "top",
+      });
+      props.onClose();
     } catch (error) {
       toast({
         title: error.code,
@@ -49,6 +59,9 @@ const ConfirmUserModal = (props: {
         isClosable: true,
         position: "top",
       });
+
+      // clear form
+      e.target.reset();
     }
   };
 
@@ -65,7 +78,21 @@ const ConfirmUserModal = (props: {
               gridAutoFlow="row"
               w={["250px", "300px"]}
               gridGap={1}
+              onSubmit={handleSubmit(onConfirmEmail)}
             >
+              <Input
+                placeholder="Email"
+                bgColor="white"
+                borderStyle="solid"
+                borderColor="brand.gray.100"
+                name="email"
+                autoComplete="email"
+                errorBorderColor="brand.red.600"
+                ref={register({
+                  required: true,
+                  pattern: /\S+@\S+\.\S+/,
+                })}
+              />
               <Input
                 placeholder="Confirmation code"
                 bgColor="white"
@@ -74,6 +101,12 @@ const ConfirmUserModal = (props: {
                 name="confirmation_code"
                 autoComplete="one-time-code"
                 errorBorderColor="brand.red.600"
+                ref={register({
+                  required: true,
+                  minLength: 6,
+                  maxLength: 6,
+                  pattern: /[0-9]{6}/,
+                })}
               />
               <Button
                 mt={1}

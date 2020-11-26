@@ -1,4 +1,4 @@
-import React, { useReducer } from "react";
+import React, { useReducer, useContext } from "react";
 import authContextReducer from "./auth-context-reducer";
 import { IAuthContextState, IAuthContextReducerAction } from "./auth-types";
 import { CognitoUser } from "amazon-cognito-identity-js";
