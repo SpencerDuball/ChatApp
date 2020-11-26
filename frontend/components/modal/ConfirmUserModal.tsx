@@ -14,7 +14,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { useForm } from "react-hook-form";
-import { Auth, toast } from "aws-amplify";
+import { Auth } from "aws-amplify";
 
 interface IConfirmEmailInput {
   confirmation_code: string;

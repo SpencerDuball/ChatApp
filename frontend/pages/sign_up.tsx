@@ -80,9 +80,6 @@ const SignUp = () => {
         position: "top",
       });
     }
-
-    // clear the form
-    e.target.reset();
   };
 
   return (

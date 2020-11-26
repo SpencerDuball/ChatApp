@@ -38,7 +38,7 @@ const SignIn = () => {
   const [showPassword, setShowPassword] = useState(false);
   const toggleShowPassword = () => setShowPassword(!showPassword);
 
-  // modal disclosure
+  // modal
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   // add toast
@@ -98,9 +98,6 @@ const SignIn = () => {
         }
       }
     }
-
-    // clear the form
-    e.target.reset();
   };
 
   return (
