@@ -1,3 +1,4 @@
+import { BaseSyntheticEvent } from "react";
 import { useState } from "react";
 import Head from "next/head";
 import {
@@ -11,12 +12,14 @@ import {
   InputRightElement,
   InputGroup,
   Button,
+  useToast,
 } from "@chakra-ui/react";
 import { IoMdPerson, IoMdPeople, IoMdKey, IoMdAt } from "react-icons/io";
 import BackgroundIllustrations from "components/svg/BackgroundIllustrations";
 import ChatAppLogo from "components/svg/ChatAppLogo";
 import NextLink from "next/link";
 import { useForm } from "react-hook-form";
+import { Auth } from "aws-amplify";
 
 // constants
 const minH = "500px";
@@ -34,9 +37,39 @@ const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
   const toggleShowPassword = () => setShowPassword(!showPassword);
 
+  // add toast
+  const toast = useToast();
+
   // control form
   const { register, handleSubmit, errors } = useForm<SignUpInputs>();
-  const onSignUp = (data: SignUpInputs) => console.log(data);
+  const onSignUp = async (
+    data: SignUpInputs,
+    e: BaseSyntheticEvent<HTMLFormElement>
+  ) => {
+    try {
+      // initiate sign up
+      const signUpResult = await Auth.signUp({
+        username: data.email,
+        password: data.password,
+        attributes: {
+          family_name: data.family_name,
+          given_name: data.given_name,
+        },
+      });
+    } catch (error) {
+      toast({
+        title: error.code,
+        description: error.message,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "top",
+      });
+    }
+
+    // clear the form
+    e.target.reset();
+  };
 
   return (
     <>
