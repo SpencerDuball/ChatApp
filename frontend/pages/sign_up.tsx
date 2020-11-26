@@ -42,7 +42,10 @@ const SignUp = () => {
 
   // modal
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [username, setUsername] = useState("");
+  const [credentials, setCredentials] = useState({
+    username: "",
+    password: "",
+  });
 
   // add toast
   const toast = useToast();
@@ -74,7 +77,7 @@ const SignUp = () => {
       setCognitoUser(dispatch, signUpResult.user);
 
       // open confirm user modal
-      setUsername(data.email);
+      setCredentials({ username: data.email, password: data.password });
       onOpen();
     } catch (error) {
       toast({
@@ -97,7 +100,7 @@ const SignUp = () => {
         isOpen={isOpen}
         onOpen={onOpen}
         onClose={onClose}
-        username={username}
+        credentials={credentials}
       />
       <Head>
         <title>ChatApp | Sign Up</title>

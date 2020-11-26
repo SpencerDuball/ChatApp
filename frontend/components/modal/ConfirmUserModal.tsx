@@ -9,7 +9,6 @@ import {
   ModalFooter,
   Center,
   Button,
-  Grid,
   HStack,
   PinInput,
   PinInputField,
@@ -31,7 +30,10 @@ const ConfirmUserModal = (props: {
   isOpen: boolean;
   onOpen: () => void;
   onClose: () => void;
-  username: string;
+  credentials: {
+    username: string;
+    password: string;
+  };
 }) => {
   const { register, handleSubmit, errors } = useForm<IConfirmEmailInput>();
   const toast = useToast();
@@ -43,7 +45,7 @@ const ConfirmUserModal = (props: {
     try {
       // confirm email
       const confirmSignUp = await Auth.confirmSignUp(
-        props.username,
+        props.credentials.username,
         `${data.otc_1}${data.otc_2}${data.otc_3}${data.otc_4}${data.otc_5}${data.otc_6}`
       );
 

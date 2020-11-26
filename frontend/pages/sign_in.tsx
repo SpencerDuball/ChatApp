@@ -40,7 +40,10 @@ const SignIn = () => {
 
   // modal
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [username, setUsername] = useState("");
+  const [credentials, setCredentials] = useState({
+    username: "",
+    password: "",
+  });
 
   // add toast
   const toast = useToast();
@@ -81,7 +84,7 @@ const SignIn = () => {
       router.push("/messenger");
     } catch (error) {
       // set username for modal
-      setUsername(data.email);
+      setCredentials({ username: data.email, password: data.password });
 
       switch (error.code) {
         // present user with modal to confirm email
@@ -113,7 +116,7 @@ const SignIn = () => {
         isOpen={isOpen}
         onOpen={onOpen}
         onClose={onClose}
-        username={username}
+        credentials={credentials}
       />
       <Head>
         <title>ChatApp | Sign In</title>
