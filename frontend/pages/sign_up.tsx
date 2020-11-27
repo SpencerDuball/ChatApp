@@ -79,15 +79,15 @@ const SignUp = () => {
 
   return (
     <>
+      <Head>
+        <title>Sign Up - ChatApp</title>
+      </Head>
       <ConfirmUserModal
         isOpen={isOpen}
         onOpen={onOpen}
         onClose={onClose}
         credentials={credentials}
       />
-      <Head>
-        <title>ChatApp | Sign Up</title>
-      </Head>
       <Box as="main" h="100vh" w="100%" position="relative" minH={minH}>
         <BackgroundIllustrations
           fill="brand.gold.50"

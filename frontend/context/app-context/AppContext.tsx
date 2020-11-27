@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer } from "react";
+import React, { useEffect, useLayoutEffect, useReducer } from "react";
 import appContextReducer from "./app-context-reducer";
 import {
   IAppContextState,
@@ -6,6 +6,7 @@ import {
 } from "./app-context-types";
 import { CognitoUser } from "amazon-cognito-identity-js";
 import { Auth } from "aws-amplify";
+import { useRouter } from "next/router";
 
 // create context value
 const initialState: IAppContextState = {
@@ -93,9 +94,26 @@ const useLocalStorageLogin = (
   }, []);
 };
 
+const useRouteToCorrectPage = (isLoggedIn: boolean) => {
+  const router = useRouter();
+
+  useLayoutEffect(() => {
+    if (isLoggedIn && router.pathname !== "/messenger") {
+      router.push("/messenger");
+    } else if (
+      !isLoggedIn &&
+      router.pathname !== "/sign_up" &&
+      router.pathname !== "/sign_in"
+    ) {
+      router.push("/sign_in");
+    }
+  }, [isLoggedIn, router]);
+};
+
 export const AppContextProvider = (props: { children: React.ReactNode }) => {
   const [state, dispatch] = useReducer(appContextReducer, initialState);
   useLocalStorageLogin(dispatch);
+  useRouteToCorrectPage(state.isLoggedIn);
 
   return (
     <AppContext.Provider value={[state, dispatch]} children={props.children} />

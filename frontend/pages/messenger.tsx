@@ -5,7 +5,7 @@ const Messenger = () => {
   return (
     <>
       <Head>
-        <title>ChatApp | Messenger</title>
+        <title>Messenger - ChatApp</title>
       </Head>
       <Box h="100vh" w="100%" bgColor="brand.blue.200">
         hello
