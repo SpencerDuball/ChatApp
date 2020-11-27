@@ -1,4 +1,9 @@
-import { BaseSyntheticEvent } from "react";
+import { BaseSyntheticEvent, useContext } from "react";
+import {
+  useCognitoUser,
+  signIn,
+  AuthContext,
+} from "context/auth-context/AuthContext";
 import {
   Modal,
   ModalOverlay,
@@ -16,6 +21,7 @@ import {
 } from "@chakra-ui/react";
 import { useForm } from "react-hook-form";
 import { Auth } from "aws-amplify";
+import { useRouter } from "next/router";
 
 interface IConfirmEmailInput {
   otc_1: string;
@@ -37,20 +43,25 @@ const ConfirmUserModal = (props: {
 }) => {
   const { register, handleSubmit, errors } = useForm<IConfirmEmailInput>();
   const toast = useToast();
+  const cognitoUser = useCognitoUser();
+  const [, dispatch] = useContext(AuthContext);
+  const router = useRouter();
 
   const onConfirmEmail = async (
     data: IConfirmEmailInput,
     e: BaseSyntheticEvent<HTMLFormElement>
   ) => {
     try {
-      // confirm email
+      // confirm email & sign in
       await Auth.confirmSignUp(
         props.credentials.username,
         `${data.otc_1}${data.otc_2}${data.otc_3}${data.otc_4}${data.otc_5}${data.otc_6}`
       );
-
-      // sign user in after confirming email
-      await Auth.signIn(props.credentials.username, props.credentials.password);
+      await signIn(
+        dispatch,
+        props.credentials.username,
+        props.credentials.password
+      );
 
       // close modal
       toast({
@@ -62,6 +73,9 @@ const ConfirmUserModal = (props: {
         position: "top",
       });
       props.onClose();
+
+      // redirect to /messenger
+      router.push("/messenger");
     } catch (error) {
       toast({
         title: error.code,

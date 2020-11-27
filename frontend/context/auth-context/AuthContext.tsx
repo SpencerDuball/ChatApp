@@ -1,4 +1,4 @@
-import React, { useReducer } from "react";
+import React, { useReducer, useContext } from "react";
 import authContextReducer from "./auth-context-reducer";
 import { IAuthContextState, IAuthContextReducerAction } from "./auth-types";
 import { CognitoUser } from "amazon-cognito-identity-js";
@@ -23,7 +23,14 @@ export const AuthContextProvider = (props: { children: React.ReactNode }) => {
   );
 };
 
-// dispatch functions
+//////////////////////////////////////////////////////////////////////////////////
+// Hooks
+//////////////////////////////////////////////////////////////////////////////////
+export const useCognitoUser = () => useContext(AuthContext)[0].cognitoUser;
+
+//////////////////////////////////////////////////////////////////////////////////
+// Dispatch Functions
+//////////////////////////////////////////////////////////////////////////////////
 export const setCognitoUser = (
   dispatch: React.Dispatch<IAuthContextReducerAction>,
   cognitoUser: CognitoUser
@@ -36,18 +43,16 @@ export const setCognitoUser = (
   });
 };
 
-// sign in
-export interface ISignInInputs {
-  username: string;
-  password: string;
-}
 export const signIn = async (
   dispatch: React.Dispatch<IAuthContextReducerAction>,
   username: string,
   password: string
 ) => {
   try {
-    const signInResult = await Auth.signIn({ username, password });
+    const signInResult = await Auth.signIn({
+      username: username,
+      password: password,
+    });
     setCognitoUser(dispatch, signInResult.user);
     return signInResult;
   } catch (error) {
@@ -55,13 +60,27 @@ export const signIn = async (
   }
 };
 
-// sign up
 export const signUp = async (
   dispatch: React.Dispatch<IAuthContextReducerAction>,
-  payload: {
+  input: {
     given_name: string;
     family_name: string;
     email: string;
     password: string;
   }
-) => {};
+) => {
+  try {
+    const signUpResult = await Auth.signUp({
+      username: input.email,
+      password: input.password,
+      attributes: {
+        given_name: input.given_name,
+        family_name: input.family_name,
+      },
+    });
+    setCognitoUser(dispatch, signUpResult.user);
+    return signUpResult;
+  } catch (error) {
+    throw error;
+  }
+};

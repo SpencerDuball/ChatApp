@@ -1,5 +1,5 @@
 import { BaseSyntheticEvent, useState, useContext } from "react";
-import { AuthContext, setCognitoUser } from "context/auth-context/AuthContext";
+import { AuthContext, signUp } from "context/auth-context/AuthContext";
 import Head from "next/head";
 import {
   Box,
@@ -53,31 +53,16 @@ const SignUp = () => {
   // collect auth context
   const [, dispatch] = useContext(AuthContext);
 
-  // router
-  const router = useRouter();
-
   // control form
   const { register, handleSubmit, errors } = useForm<SignUpInputs>();
   const onSignUp = async (
     data: SignUpInputs,
     e: BaseSyntheticEvent<HTMLFormElement>
   ) => {
+    // set credentials so they are accessable by ConfirmUserModal
+    setCredentials({ username: data.email, password: data.password });
     try {
-      // initiate sign up
-      const signUpResult = await Auth.signUp({
-        username: data.email,
-        password: data.password,
-        attributes: {
-          family_name: data.family_name,
-          given_name: data.given_name,
-        },
-      });
-
-      // save cognito user
-      setCognitoUser(dispatch, signUpResult.user);
-
-      // open confirm user modal
-      setCredentials({ username: data.email, password: data.password });
+      await signUp(dispatch, data);
       onOpen();
     } catch (error) {
       toast({

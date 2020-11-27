@@ -21,7 +21,6 @@ import BackgroundIllustrations from "components/svg/BackgroundIllustrations";
 import ChatAppLogo from "components/svg/ChatAppLogo";
 import NextLink from "next/link";
 import { useForm } from "react-hook-form";
-import { Auth } from "aws-amplify";
 import ConfirmUserModal from "components/modal/ConfirmUserModal";
 
 // constants
@@ -60,11 +59,10 @@ const SignIn = () => {
     data: SignInInputs,
     e: BaseSyntheticEvent<HTMLFormElement>
   ) => {
+    // set credentials so they are accessable by ConfirmUserModal
+    setCredentials({ username: data.email, password: data.password });
     try {
-      // sign in
       await signIn(dispatch, data.email, data.password);
-
-      // toast sign in
       toast({
         title: "Sign In Successful",
         description: "Welcome back to ChatApp!",
@@ -73,20 +71,15 @@ const SignIn = () => {
         isClosable: true,
         position: "top",
       });
-
-      // redirect to /app
+      // redirect to /messenger
       router.push("/messenger");
     } catch (error) {
-      // set username for modal
-      setCredentials({ username: data.email, password: data.password });
-
       switch (error.code) {
-        // present user with modal to confirm email
         case "UserNotConfirmedException": {
+          // present user with modal to confirm email
           onOpen();
           break;
         }
-
         default: {
           toast({
             title: error.code,

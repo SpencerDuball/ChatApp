@@ -8,7 +8,10 @@ const authContextReducer = (
     case "SET_COGNITO_USER": {
       // save the cognito user to localStorage
       if (window && window.localStorage) {
-        window.localStorage.setItem("cognitoUser", action.payload.cognitoUser);
+        window.localStorage.setItem(
+          "cognitoUser",
+          JSON.stringify(action.payload.cognitoUser)
+        );
       }
 
       // save the new cognito user to context
