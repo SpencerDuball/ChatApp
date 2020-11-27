@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { BaseSyntheticEvent, useState, useContext } from "react";
+import { AppContext, signUp } from "context/app-context/AppContext";
 import Head from "next/head";
 import {
   Box,
@@ -11,12 +12,15 @@ import {
   InputRightElement,
   InputGroup,
   Button,
+  useToast,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { IoMdPerson, IoMdPeople, IoMdKey, IoMdAt } from "react-icons/io";
 import BackgroundIllustrations from "components/svg/BackgroundIllustrations";
 import ChatAppLogo from "components/svg/ChatAppLogo";
 import NextLink from "next/link";
 import { useForm } from "react-hook-form";
+import ConfirmUserModal from "components/modal/ConfirmUserModal";
 
 // constants
 const minH = "500px";
@@ -34,15 +38,56 @@ const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
   const toggleShowPassword = () => setShowPassword(!showPassword);
 
+  // modal
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [credentials, setCredentials] = useState({
+    username: "",
+    password: "",
+  });
+
+  // add toast
+  const toast = useToast();
+
+  // collect auth context
+  const [, dispatch] = useContext(AppContext);
+
   // control form
   const { register, handleSubmit, errors } = useForm<SignUpInputs>();
-  const onSignUp = (data: SignUpInputs) => console.log(data);
+  const onSignUp = async (
+    data: SignUpInputs,
+    e: BaseSyntheticEvent<HTMLFormElement>
+  ) => {
+    // set credentials so they are accessable by ConfirmUserModal
+    setCredentials({ username: data.email, password: data.password });
+    try {
+      await signUp(dispatch, data);
+      onOpen();
+    } catch (error) {
+      toast({
+        title: error.code,
+        description: error.message,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "top",
+      });
+    }
+
+    // reset the form
+    e.target.reset();
+  };
 
   return (
     <>
       <Head>
-        <title>ChatApp | Sign Up</title>
+        <title>Sign Up - ChatApp</title>
       </Head>
+      <ConfirmUserModal
+        isOpen={isOpen}
+        onOpen={onOpen}
+        onClose={onClose}
+        credentials={credentials}
+      />
       <Box as="main" h="100vh" w="100%" position="relative" minH={minH}>
         <BackgroundIllustrations
           fill="brand.gold.50"

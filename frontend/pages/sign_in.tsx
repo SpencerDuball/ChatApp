@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, BaseSyntheticEvent, useContext } from "react";
+import { AppContext, signIn } from "context/app-context/AppContext";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import {
   Box,
   Center,
@@ -11,12 +13,15 @@ import {
   InputRightElement,
   InputGroup,
   Button,
+  useToast,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { IoMdKey, IoMdAt } from "react-icons/io";
 import BackgroundIllustrations from "components/svg/BackgroundIllustrations";
 import ChatAppLogo from "components/svg/ChatAppLogo";
 import NextLink from "next/link";
 import { useForm } from "react-hook-form";
+import ConfirmUserModal from "components/modal/ConfirmUserModal";
 
 // constants
 const minH = "500px";
@@ -32,15 +37,77 @@ const SignIn = () => {
   const [showPassword, setShowPassword] = useState(false);
   const toggleShowPassword = () => setShowPassword(!showPassword);
 
+  // modal
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [credentials, setCredentials] = useState({
+    username: "",
+    password: "",
+  });
+
+  // add toast
+  const toast = useToast();
+
+  // auth context
+  const [, dispatch] = useContext(AppContext);
+
+  // router
+  const router = useRouter();
+
   // control form
   const { register, handleSubmit, errors } = useForm<SignInInputs>();
-  const onSignIn = (data: SignInInputs) => console.log(data);
+  const onSignIn = async (
+    data: SignInInputs,
+    e: BaseSyntheticEvent<HTMLFormElement>
+  ) => {
+    // set credentials so they are accessable by ConfirmUserModal
+    setCredentials({ username: data.email, password: data.password });
+    try {
+      await signIn(dispatch, data.email, data.password);
+      toast({
+        title: "Sign In Successful",
+        description: "Welcome back to ChatApp!",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+        position: "top",
+      });
+      // redirect to /messenger
+      router.push("/messenger");
+    } catch (error) {
+      switch (error.code) {
+        case "UserNotConfirmedException": {
+          // present user with modal to confirm email
+          onOpen();
+          break;
+        }
+        default: {
+          toast({
+            title: error.code,
+            description: error.message,
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+            position: "top",
+          });
+        }
+      }
+    }
+
+    // clear the form
+    e.target.reset();
+  };
 
   return (
     <>
       <Head>
-        <title>ChatApp | Sign In</title>
+        <title>Sign In - ChatApp</title>
       </Head>
+      <ConfirmUserModal
+        isOpen={isOpen}
+        onOpen={onOpen}
+        onClose={onClose}
+        credentials={credentials}
+      />
       <Box as="main" h="100vh" w="100%" position="relative" minH={minH}>
         <BackgroundIllustrations
           fill="brand.gold.50"

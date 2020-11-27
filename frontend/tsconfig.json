@@ -20,7 +20,8 @@
     "baseUrl": ".",
     "paths": {
       "util": ["util/*"],
-      "components": ["components/*"]
+      "components": ["components/*"],
+      "context": ["context/*"]
     }
   },
   "include": [
