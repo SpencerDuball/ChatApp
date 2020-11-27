@@ -44,10 +44,13 @@ const ConfirmUserModal = (props: {
   ) => {
     try {
       // confirm email
-      const confirmSignUp = await Auth.confirmSignUp(
+      await Auth.confirmSignUp(
         props.credentials.username,
         `${data.otc_1}${data.otc_2}${data.otc_3}${data.otc_4}${data.otc_5}${data.otc_6}`
       );
+
+      // sign user in after confirming email
+      await Auth.signIn(props.credentials.username, props.credentials.password);
 
       // close modal
       toast({

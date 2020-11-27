@@ -1,5 +1,5 @@
 import { useState, BaseSyntheticEvent, useContext } from "react";
-import { AuthContext, setCognitoUser } from "context/auth-context/AuthContext";
+import { AuthContext, signIn } from "context/auth-context/AuthContext";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import {
@@ -61,14 +61,8 @@ const SignIn = () => {
     e: BaseSyntheticEvent<HTMLFormElement>
   ) => {
     try {
-      // initiate sign in
-      const signInResult = await Auth.signIn({
-        username: data.email,
-        password: data.password,
-      });
-
-      // save cognito user
-      setCognitoUser(dispatch, signInResult.user);
+      // sign in
+      await signIn(dispatch, data.email, data.password);
 
       // toast sign in
       toast({
