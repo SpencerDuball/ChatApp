@@ -1,9 +1,5 @@
 import { BaseSyntheticEvent, useContext } from "react";
-import {
-  useCognitoUser,
-  signIn,
-  AuthContext,
-} from "context/auth-context/AuthContext";
+import { signIn, AppContext } from "context/app-context/AppContext";
 import {
   Modal,
   ModalOverlay,
@@ -43,8 +39,7 @@ const ConfirmUserModal = (props: {
 }) => {
   const { register, handleSubmit, errors } = useForm<IConfirmEmailInput>();
   const toast = useToast();
-  const cognitoUser = useCognitoUser();
-  const [, dispatch] = useContext(AuthContext);
+  const [, dispatch] = useContext(AppContext);
   const router = useRouter();
 
   const onConfirmEmail = async (

@@ -1,5 +1,5 @@
 import { BaseSyntheticEvent, useState, useContext } from "react";
-import { AuthContext, signUp } from "context/auth-context/AuthContext";
+import { AppContext, signUp } from "context/app-context/AppContext";
 import Head from "next/head";
 import {
   Box,
@@ -20,8 +20,6 @@ import BackgroundIllustrations from "components/svg/BackgroundIllustrations";
 import ChatAppLogo from "components/svg/ChatAppLogo";
 import NextLink from "next/link";
 import { useForm } from "react-hook-form";
-import { Auth } from "aws-amplify";
-import { useRouter } from "next/router";
 import ConfirmUserModal from "components/modal/ConfirmUserModal";
 
 // constants
@@ -51,7 +49,7 @@ const SignUp = () => {
   const toast = useToast();
 
   // collect auth context
-  const [, dispatch] = useContext(AuthContext);
+  const [, dispatch] = useContext(AppContext);
 
   // control form
   const { register, handleSubmit, errors } = useForm<SignUpInputs>();

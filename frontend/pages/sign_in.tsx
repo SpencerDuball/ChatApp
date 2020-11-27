@@ -1,5 +1,5 @@
 import { useState, BaseSyntheticEvent, useContext } from "react";
-import { AuthContext, signIn } from "context/auth-context/AuthContext";
+import { AppContext, signIn } from "context/app-context/AppContext";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import {
@@ -48,7 +48,7 @@ const SignIn = () => {
   const toast = useToast();
 
   // auth context
-  const [, dispatch] = useContext(AuthContext);
+  const [, dispatch] = useContext(AppContext);
 
   // router
   const router = useRouter();
