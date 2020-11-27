@@ -35,6 +35,8 @@ export const setCognitoUser = (
   dispatch: React.Dispatch<IAuthContextReducerAction>,
   cognitoUser: CognitoUser
 ) => {
+  console.log("setCognitoUser:");
+  console.log(cognitoUser);
   dispatch({
     type: "SET_COGNITO_USER",
     payload: {
@@ -53,7 +55,7 @@ export const signIn = async (
       username: username,
       password: password,
     });
-    setCognitoUser(dispatch, signInResult.user);
+    setCognitoUser(dispatch, signInResult);
     return signInResult;
   } catch (error) {
     throw error;
