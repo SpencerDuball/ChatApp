@@ -98,8 +98,15 @@ export class ApiPlane extends cdk.Stack {
             },
           },
         },
+        tags: [
+          {
+            name: "Project",
+            "x-amazon-apigateway-tag-value": "ChatApp",
+          },
+        ],
       },
     });
+    console.log(props.tags);
 
     // create test stage
     const testStage = new apiGwV2.CfnStage(

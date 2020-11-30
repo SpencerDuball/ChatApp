@@ -9,3 +9,10 @@ dotenv.config();
 
 const app = new cdk.App();
 new ContactsServiceStack(app, "ContactsServiceStack");
+
+// add 'Project' tag
+cdk.Tags.of(app).add("Project", "ChatApp", {
+  // prevent from tagging Api Gateway V2. This prevents an error where using the openapi body
+  // attribute of the cloudformation resource does not also allow tags to be applied
+  excludeResourceTypes: ["AWS::ApiGatewayV2::Api"],
+});
