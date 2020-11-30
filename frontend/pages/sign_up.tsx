@@ -48,9 +48,6 @@ const SignUp = () => {
   // add toast
   const toast = useToast();
 
-  // collect auth context
-  const [, dispatch] = useContext(AppContext);
-
   // control form
   const { register, handleSubmit, errors } = useForm<SignUpInputs>();
   const onSignUp = async (
@@ -60,7 +57,7 @@ const SignUp = () => {
     // set credentials so they are accessable by ConfirmUserModal
     setCredentials({ username: data.email, password: data.password });
     try {
-      await signUp(dispatch, data);
+      await signUp(data);
       onOpen();
     } catch (error) {
       toast({

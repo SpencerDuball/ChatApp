@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useReducer } from "react";
+import React, { useEffect, useReducer } from "react";
 import appContextReducer from "./app-context-reducer";
 import {
   IAppContextState,
@@ -51,15 +51,12 @@ export const signIn = async (
   }
 };
 
-export const signUp = async (
-  dispatch: React.Dispatch<IAppContextReducerAction>,
-  input: {
-    given_name: string;
-    family_name: string;
-    email: string;
-    password: string;
-  }
-): Promise<CognitoUser> => {
+export const signUp = async (input: {
+  given_name: string;
+  family_name: string;
+  email: string;
+  password: string;
+}): Promise<CognitoUser> => {
   try {
     const signUpResult = await Auth.signUp({
       username: input.email,
@@ -69,7 +66,6 @@ export const signUp = async (
         family_name: input.family_name,
       },
     });
-    setIsLoggedIn(dispatch, true);
     return signUpResult.user;
   } catch (error) {
     throw error;
@@ -97,14 +93,13 @@ const useLocalStorageLogin = (
 const useRouteToCorrectPage = (isLoggedIn: boolean) => {
   const router = useRouter();
 
-  useLayoutEffect(() => {
-    if (isLoggedIn && router.pathname !== "/messenger") {
-      router.push("/messenger");
-    } else if (
-      !isLoggedIn &&
-      router.pathname !== "/sign_up" &&
-      router.pathname !== "/sign_in"
+  useEffect(() => {
+    if (
+      isLoggedIn &&
+      (router.pathname === "/sign_up" || router.pathname === "/sign_in")
     ) {
+      router.push("/messenger");
+    } else if (!isLoggedIn && router.pathname === "/messenger") {
       router.push("/sign_in");
     }
   }, [isLoggedIn, router]);
