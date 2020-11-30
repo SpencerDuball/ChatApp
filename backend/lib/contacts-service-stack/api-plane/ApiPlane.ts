@@ -1,6 +1,7 @@
 import * as cdk from "@aws-cdk/core";
 import * as apiGwV2 from "@aws-cdk/aws-apigatewayv2";
 import * as lambda from "@aws-cdk/aws-lambda";
+import * as iam from "@aws-cdk/aws-iam";
 
 interface ComputePlaneLambda {
   lambda: {
@@ -17,6 +18,24 @@ export class ApiPlane extends cdk.Stack {
     super(scope, id, props);
 
     // create invoke role
+    const invokeLambdaRole = new iam.CfnRole(
+      this,
+      "ChatAppInvokeLambdaRoleForApiGwV2",
+      {
+        assumeRolePolicyDocument: iam.PolicyDocument.fromJson({
+          Statement: [
+            {
+              Effect: "Allow",
+              Principal: { Service: ["apigateway.amazonaws.com"] },
+              Action: ["sts:AssumeRole"],
+            },
+          ],
+        }),
+        managedPolicyArns: [
+          "arn:aws:iam::aws:policy/AmazonAPIGatewayInvokeFullAccess",
+        ],
+      }
+    );
 
     // create api
     const contactsApi = new apiGwV2.CfnApi(this, "ChatAppContactsApi", {
@@ -34,9 +53,10 @@ export class ApiPlane extends cdk.Stack {
                   description: "Default response for GET /contact",
                 },
               },
-            },
-            "x-amazon-apigateway-integration": {
-              $ref: "#/components/x-amazon-apigateway-integrations/getContact",
+              "x-amazon-apigateway-integration": {
+                $ref:
+                  "#/components/x-amazon-apigateway-integrations/getContact",
+              },
             },
           },
           "/contacts": {
@@ -46,25 +66,30 @@ export class ApiPlane extends cdk.Stack {
                   description: "Default response for GET /contacts",
                 },
               },
-            },
-            "x-amazon-apigateway-integration": {
-              $ref: "#/components/x-amazon-apigateway-integrations/getContacts",
+              "x-amazon-apigateway-integration": {
+                $ref:
+                  "#/components/x-amazon-apigateway-integrations/getContacts",
+              },
             },
           },
         },
         components: {
           "x-amazon-apigateway-integrations": {
             getContact: {
-              type: "aws_proxy",
+              type: "AWS_PROXY",
               uri: props.lambda.getContact.attrArn,
+              credentials: invokeLambdaRole.attrArn,
               httpMethod: "POST",
               payloadFormatVersion: "2.0",
+              connectionType: "INTERNET",
             },
             getContacts: {
-              type: "aws_proxy",
+              type: "AWS_PROXY",
               uri: props.lambda.getContacts.attrArn,
+              credentials: invokeLambdaRole.attrArn,
               httpMethod: "POST",
               payloadFormatVersion: "2.0",
+              connectionType: "INTERNET",
             },
           },
         },
