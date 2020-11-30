@@ -23,21 +23,21 @@ export const getContacts = async (event: any) => {
     },
     body: [
       {
-        given_name: "Spencer",
-        family_name: "Duball",
-        email: "spencerduball@gmail.com",
-        sub: "2093948028340-39480243383-234439829483",
-      },
-      {
-        given_name: "Luke",
-        family_name: "Duball",
-        email: "lukeduball@gmail.com",
-        sub: "2093948028340-39480243383-234439829483",
-      },
-      {
         given_name: "Jerry",
-        family_name: "Duball",
-        email: "jerryduball@gmail.com",
+        family_name: "Macguire",
+        email: "jerrymacguire@gmail.com",
+        sub: "2093948028340-39480243383-234439829483",
+      },
+      {
+        given_name: "Portia",
+        family_name: "Doubleday",
+        email: "portiadoubleday@gmail.com",
+        sub: "2093948028340-39480243383-234439829483",
+      },
+      {
+        given_name: "Rami",
+        family_name: "Malek",
+        email: "ramimalek@gmail.com",
         sub: "2093948028340-39480243383-234439829483",
       },
     ],

@@ -17,6 +17,25 @@ export class ApiPlane extends cdk.Stack {
   ) {
     super(scope, id, props);
 
+    // create invoke policy
+    const invokeLambdaPolicy = new iam.CfnManagedPolicy(
+      this,
+      "ChatAppInvokeLambdaPolicy",
+      {
+        policyDocument: iam.PolicyDocument.fromJson({
+          Statement: [
+            {
+              Effect: "Allow",
+              Action: ["lambda:InvokeFunction"],
+              Resource: Object.values(props.lambda).map(
+                (lambdaValue) => lambdaValue.attrArn
+              ),
+            },
+          ],
+        }),
+      }
+    );
+
     // create invoke role
     const invokeLambdaRole = new iam.CfnRole(
       this,
@@ -31,9 +50,7 @@ export class ApiPlane extends cdk.Stack {
             },
           ],
         }),
-        managedPolicyArns: [
-          "arn:aws:iam::aws:policy/AmazonAPIGatewayInvokeFullAccess",
-        ],
+        managedPolicyArns: [invokeLambdaPolicy.ref],
       }
     );
 
@@ -54,8 +71,12 @@ export class ApiPlane extends cdk.Stack {
                 },
               },
               "x-amazon-apigateway-integration": {
-                $ref:
-                  "#/components/x-amazon-apigateway-integrations/getContact",
+                payloadFormatVersion: "2.0",
+                credentials: invokeLambdaRole.attrArn,
+                type: "aws_proxy",
+                httpMethod: "POST",
+                uri: `arn:aws:apigateway:${this.region}:lambda:path/2015-03-31/functions/${props.lambda.getContact.attrArn}/invocations`,
+                connectionType: "INTERNET",
               },
             },
           },
@@ -67,29 +88,13 @@ export class ApiPlane extends cdk.Stack {
                 },
               },
               "x-amazon-apigateway-integration": {
-                $ref:
-                  "#/components/x-amazon-apigateway-integrations/getContacts",
+                payloadFormatVersion: "2.0",
+                credentials: invokeLambdaRole.attrArn,
+                type: "aws_proxy",
+                httpMethod: "POST",
+                uri: `arn:aws:apigateway:${this.region}:lambda:path/2015-03-31/functions/${props.lambda.getContacts.attrArn}/invocations`,
+                connectionType: "INTERNET",
               },
-            },
-          },
-        },
-        components: {
-          "x-amazon-apigateway-integrations": {
-            getContact: {
-              type: "AWS_PROXY",
-              uri: props.lambda.getContact.attrArn,
-              credentials: invokeLambdaRole.attrArn,
-              httpMethod: "POST",
-              payloadFormatVersion: "2.0",
-              connectionType: "INTERNET",
-            },
-            getContacts: {
-              type: "AWS_PROXY",
-              uri: props.lambda.getContacts.attrArn,
-              credentials: invokeLambdaRole.attrArn,
-              httpMethod: "POST",
-              payloadFormatVersion: "2.0",
-              connectionType: "INTERNET",
             },
           },
         },
@@ -97,9 +102,14 @@ export class ApiPlane extends cdk.Stack {
     });
 
     // create test stage
-    new apiGwV2.CfnStage(this, "ChatAppContactsApiTestStage", {
-      apiId: contactsApi.ref,
-      stageName: "test",
-    });
+    const testStage = new apiGwV2.CfnStage(
+      this,
+      "ChatAppContactsApiTestStage",
+      {
+        apiId: contactsApi.ref,
+        stageName: "test",
+        autoDeploy: true,
+      }
+    );
   }
 }

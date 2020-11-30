@@ -14,7 +14,10 @@ export class ComputePlane extends cdk.Stack {
 
     // upload lambda assets as a .zip to S3
     const lambdaS3AssetsZip = new assets.Asset(this, "ChatAppLambdaAssets", {
-      path: path.join(__dirname, "lambda"),
+      path: path.join(
+        __dirname,
+        "../../../build/lib/contacts-service-stack/compute-plane/lambda"
+      ),
     });
 
     // create roles for lambda
