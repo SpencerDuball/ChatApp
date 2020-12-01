@@ -67,7 +67,7 @@ export class ApiPlane extends cdk.Stack {
             get: {
               responses: {
                 default: {
-                  description: "Default response for GET /contact",
+                  description: "Default response for GET /contact/{id}",
                 },
               },
               "x-amazon-apigateway-integration": {
@@ -76,6 +76,66 @@ export class ApiPlane extends cdk.Stack {
                 type: "aws_proxy",
                 httpMethod: "POST",
                 uri: `arn:aws:apigateway:${this.region}:lambda:path/2015-03-31/functions/${props.lambda.getContact.attrArn}/invocations`,
+                connectionType: "INTERNET",
+              },
+            },
+            post: {
+              responses: {
+                default: {
+                  description: "Default response for POST /contact",
+                },
+              },
+              "x-amazon-apigateway-integration": {
+                payloadFormatVersion: "2.0",
+                credentials: invokeLambdaRole.attrArn,
+                type: "aws_proxy",
+                httpMethod: "POST",
+                uri: `arn:aws:apigateway:${this.region}:lambda:path/2015-03-31/functions/${props.lambda.postContact.attrArn}/invocations`,
+                connectionType: "INTERNET",
+              },
+            },
+            put: {
+              responses: {
+                default: {
+                  description: "Default response for PUT /contact/{id}",
+                },
+              },
+              "x-amazon-apigateway-integration": {
+                payloadFormatVersion: "2.0",
+                credentials: invokeLambdaRole.attrArn,
+                type: "aws_proxy",
+                httpMethod: "POST",
+                uri: `arn:aws:apigateway:${this.region}:lambda:path/2015-03-31/functions/${props.lambda.putContact.attrArn}/invocations`,
+                connectionType: "INTERNET",
+              },
+            },
+            patch: {
+              responses: {
+                default: {
+                  description: "Default response for PATCH /contact/{id}",
+                },
+              },
+              "x-amazon-apigateway-integration": {
+                payloadFormatVersion: "2.0",
+                credentials: invokeLambdaRole.attrArn,
+                type: "aws_proxy",
+                httpMethod: "POST",
+                uri: `arn:aws:apigateway:${this.region}:lambda:path/2015-03-31/functions/${props.lambda.patchContact.attrArn}/invocations`,
+                connectionType: "INTERNET",
+              },
+            },
+            delete: {
+              responses: {
+                default: {
+                  description: "Default response for DELETE /contact/{id}",
+                },
+              },
+              "x-amazon-apigateway-integration": {
+                payloadFormatVersion: "2.0",
+                credentials: invokeLambdaRole.attrArn,
+                type: "aws_proxy",
+                httpMethod: "POST",
+                uri: `arn:aws:apigateway:${this.region}:lambda:path/2015-03-31/functions/${props.lambda.deleteContact.attrArn}/invocations`,
                 connectionType: "INTERNET",
               },
             },
