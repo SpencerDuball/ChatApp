@@ -1,23 +1,15 @@
 // contact
 export const getContact = async (event: any) => {
-  if (event.queryStringParameters.id) {
-    return {
-      status: 200,
-      body: {
-        given_name: "Spencer",
-        family_name: "Duball",
-        email: "spencerduball@gmail.com",
-        sub: "2093948028340-39480243383-234439829483",
-      },
-    };
-  } else {
-    return {
-      status: 400,
-      body: {
-        message: "Bad request, no ID was supplied as a query string parameter.",
-      },
-    };
-  }
+  return {
+    status: 200,
+    body: {
+      id: event.pathParameters.id,
+      given_name: "Spencer",
+      family_name: "Duball",
+      email: "spencerduball@gmail.com",
+      sub: "2093948028340-39480243383-234439829483",
+    },
+  };
 };
 export const postContact = async (event: any) => {
   return {
@@ -32,67 +24,43 @@ export const postContact = async (event: any) => {
   };
 };
 export const patchContact = async (event: any) => {
-  if (event.queryStringParameters.id) {
-    return {
-      status: 200,
-      body: {
-        given_name: "Spencer",
-        family_name: "Duball",
-        email: "spencerduball@gmail.com",
-        sub: "2093948028340-39480243383-234439829483",
-        message: "User was successfully patched with a PATCH!",
-      },
-    };
-  } else {
-    return {
-      status: 400,
-      body: {
-        message: "Bad request, no ID was supplied as a query string parameter.",
-      },
-    };
-  }
+  return {
+    status: 200,
+    body: {
+      id: event.pathParameters.id,
+      given_name: "Spencer",
+      family_name: "Duball",
+      email: "spencerduball@gmail.com",
+      sub: "2093948028340-39480243383-234439829483",
+      message: "User was successfully patched with a PATCH!",
+    },
+  };
 };
 export const putContact = async (event: any) => {
-  if (event.queryStringParameters.id) {
-    return {
-      status: 200,
-      body: {
-        given_name: "Spencer",
-        family_name: "Duball",
-        email: "spencerduball@gmail.com",
-        sub: "2093948028340-39480243383-234439829483",
-        message: "User was successfully replaced with a PUT!",
-      },
-    };
-  } else {
-    return {
-      status: 400,
-      body: {
-        message: "Bad request, no ID was supplied as a query string parameter.",
-      },
-    };
-  }
+  return {
+    status: 200,
+    body: {
+      id: event.pathParameters.id,
+      given_name: "Spencer",
+      family_name: "Duball",
+      email: "spencerduball@gmail.com",
+      sub: "2093948028340-39480243383-234439829483",
+      message: "User was successfully replaced with a PUT!",
+    },
+  };
 };
 export const deleteContact = async (event: any) => {
-  if (event.queryStringParameters.id) {
-    return {
-      status: 200,
-      body: {
-        given_name: "Spencer",
-        family_name: "Duball",
-        email: "spencerduball@gmail.com",
-        sub: "2093948028340-39480243383-234439829483",
-        message: "User was successfully deleted with a DELETE!",
-      },
-    };
-  } else {
-    return {
-      status: 400,
-      body: {
-        message: "Bad request, no ID was supplied as a query string parameter.",
-      },
-    };
-  }
+  return {
+    status: 200,
+    body: {
+      id: event.pathParameters.id,
+      given_name: "Spencer",
+      family_name: "Duball",
+      email: "spencerduball@gmail.com",
+      sub: "2093948028340-39480243383-234439829483",
+      message: "User was successfully deleted with a DELETE!",
+    },
+  };
 };
 
 // contacts

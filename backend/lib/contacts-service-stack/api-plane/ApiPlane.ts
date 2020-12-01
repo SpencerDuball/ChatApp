@@ -64,21 +64,6 @@ export class ApiPlane extends cdk.Stack {
         },
         paths: {
           "/contact": {
-            get: {
-              responses: {
-                default: {
-                  description: "Default response for GET /contact/{id}",
-                },
-              },
-              "x-amazon-apigateway-integration": {
-                payloadFormatVersion: "2.0",
-                credentials: invokeLambdaRole.attrArn,
-                type: "aws_proxy",
-                httpMethod: "POST",
-                uri: `arn:aws:apigateway:${this.region}:lambda:path/2015-03-31/functions/${props.lambda.getContact.attrArn}/invocations`,
-                connectionType: "INTERNET",
-              },
-            },
             post: {
               responses: {
                 default: {
@@ -91,6 +76,23 @@ export class ApiPlane extends cdk.Stack {
                 type: "aws_proxy",
                 httpMethod: "POST",
                 uri: `arn:aws:apigateway:${this.region}:lambda:path/2015-03-31/functions/${props.lambda.postContact.attrArn}/invocations`,
+                connectionType: "INTERNET",
+              },
+            },
+          },
+          "/contact/{id}": {
+            get: {
+              responses: {
+                default: {
+                  description: "Default response for GET /contact/{id}",
+                },
+              },
+              "x-amazon-apigateway-integration": {
+                payloadFormatVersion: "2.0",
+                credentials: invokeLambdaRole.attrArn,
+                type: "aws_proxy",
+                httpMethod: "POST",
+                uri: `arn:aws:apigateway:${this.region}:lambda:path/2015-03-31/functions/${props.lambda.getContact.attrArn}/invocations`,
                 connectionType: "INTERNET",
               },
             },
