@@ -11,8 +11,13 @@ dotenv.config();
 
 const app = new cdk.App();
 new DbStack(app, "DbStack");
-new ContactsServiceStack(app, "ContactsServiceStack");
-new AuthStack(app, "AuthStack");
+const contactsServiceStack = new ContactsServiceStack(
+  app,
+  "ContactsServiceStack"
+);
+new AuthStack(app, "AuthStack", {
+  contactsApi: contactsServiceStack.apiPlane.contactsApi,
+});
 
 // add 'Project' tag
 cdk.Tags.of(app).add("Project", "ChatApp", {

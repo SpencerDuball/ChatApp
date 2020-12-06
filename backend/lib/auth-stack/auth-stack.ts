@@ -1,9 +1,15 @@
 import * as cdk from "@aws-cdk/core";
 import * as cognito from "@aws-cdk/aws-cognito";
 import * as iam from "@aws-cdk/aws-iam";
+import * as lambda from "@aws-cdk/aws-lambda";
+import * as apiGwV2 from "@aws-cdk/aws-apigatewayv2";
 
 export class AuthStack extends cdk.Stack {
-  constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
+  constructor(
+    scope: cdk.Construct,
+    id: string,
+    props: cdk.StackProps & { contactsApi: apiGwV2.CfnApi }
+  ) {
     super(scope, id, props);
 
     const userPool = new cognito.CfnUserPool(this, "ChatAppUserPool", {
@@ -86,7 +92,24 @@ export class AuthStack extends cdk.Stack {
           },
         ],
       }),
-      policies: [],
+      policies: [
+        {
+          policyDocument: iam.PolicyDocument.fromJson({
+            Statement: [
+              {
+                Effect: "Allow",
+                Action: ["execute-api:*"],
+                Resource: [
+                  `arn:aws:execute-api:${this.region}:${this.account}:${props.contactsApi.ref}/*/*/contact`,
+                  `arn:aws:execute-api:${this.region}:${this.account}:${props.contactsApi.ref}/*/*/contact/*`,
+                  `arn:aws:execute-api:${this.region}:${this.account}:${props.contactsApi.ref}/*/*/contacts`,
+                ],
+              },
+            ],
+          }),
+          policyName: "ChatAppContactsApiInvokePolicy",
+        },
+      ],
     });
 
     const identityPoolAuthRoleAttachment = new cognito.CfnIdentityPoolRoleAttachment(

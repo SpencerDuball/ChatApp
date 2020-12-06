@@ -1,5 +1,5 @@
-import { BaseSyntheticEvent, useState, useContext } from "react";
-import { AppContext, signUp } from "context/app-context/AppContext";
+import { BaseSyntheticEvent, useState } from "react";
+import { signUp } from "context/app-context/AppContext";
 import Head from "next/head";
 import {
   Box,
@@ -57,7 +57,7 @@ const SignUp = () => {
     // set credentials so they are accessable by ConfirmUserModal
     setCredentials({ username: data.email, password: data.password });
     try {
-      await signUp(data);
+      await signUp({ email: data.email, password: data.password });
       onOpen();
     } catch (error) {
       toast({

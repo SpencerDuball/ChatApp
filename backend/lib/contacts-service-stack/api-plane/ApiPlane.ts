@@ -10,6 +10,8 @@ interface ComputePlaneLambda {
 }
 
 export class ApiPlane extends cdk.Stack {
+  public contactsApi: apiGwV2.CfnApi;
+
   constructor(
     scope: cdk.Construct,
     id: string,
@@ -55,7 +57,7 @@ export class ApiPlane extends cdk.Stack {
     );
 
     // create api
-    const contactsApi = new apiGwV2.CfnApi(this, "ChatAppContactsApi", {
+    this.contactsApi = new apiGwV2.CfnApi(this, "ChatAppContactsApi", {
       body: {
         openapi: "3.0.1",
         info: {
@@ -161,7 +163,7 @@ export class ApiPlane extends cdk.Stack {
 
     // create test stage
     new apiGwV2.CfnStage(this, "ChatAppContactsApiTestStage", {
-      apiId: contactsApi.ref,
+      apiId: this.contactsApi.ref,
       stageName: "test",
       autoDeploy: true,
     });
