@@ -2,13 +2,17 @@
 import "source-map-support/register";
 import * as dotenv from "dotenv";
 import * as cdk from "@aws-cdk/core";
+import { DbStack } from "../lib/db-stack/db-stack";
 import { ContactsServiceStack } from "../lib/contacts-service-stack/contacts-service-stack";
+import { AuthStack } from "../lib/auth-stack/auth-stack";
 
 // configure environment variables
 dotenv.config();
 
 const app = new cdk.App();
+new DbStack(app, "DbStack");
 new ContactsServiceStack(app, "ContactsServiceStack");
+new AuthStack(app, "AuthStack");
 
 // add 'Project' tag
 cdk.Tags.of(app).add("Project", "ChatApp", {

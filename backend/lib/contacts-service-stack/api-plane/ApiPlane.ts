@@ -70,6 +70,7 @@ export class ApiPlane extends cdk.Stack {
                   description: "Default response for POST /contact",
                 },
               },
+              "x-amazon-apigateway-auth": { type: "AWS_IAM" },
               "x-amazon-apigateway-integration": {
                 payloadFormatVersion: "2.0",
                 credentials: invokeLambdaRole.attrArn,
@@ -87,6 +88,7 @@ export class ApiPlane extends cdk.Stack {
                   description: "Default response for GET /contact/{id}",
                 },
               },
+              "x-amazon-apigateway-auth": { type: "AWS_IAM" },
               "x-amazon-apigateway-integration": {
                 payloadFormatVersion: "2.0",
                 credentials: invokeLambdaRole.attrArn,
@@ -96,27 +98,13 @@ export class ApiPlane extends cdk.Stack {
                 connectionType: "INTERNET",
               },
             },
-            put: {
-              responses: {
-                default: {
-                  description: "Default response for PUT /contact/{id}",
-                },
-              },
-              "x-amazon-apigateway-integration": {
-                payloadFormatVersion: "2.0",
-                credentials: invokeLambdaRole.attrArn,
-                type: "aws_proxy",
-                httpMethod: "POST",
-                uri: `arn:aws:apigateway:${this.region}:lambda:path/2015-03-31/functions/${props.lambda.putContact.attrArn}/invocations`,
-                connectionType: "INTERNET",
-              },
-            },
             patch: {
               responses: {
                 default: {
                   description: "Default response for PATCH /contact/{id}",
                 },
               },
+              "x-amazon-apigateway-auth": { type: "AWS_IAM" },
               "x-amazon-apigateway-integration": {
                 payloadFormatVersion: "2.0",
                 credentials: invokeLambdaRole.attrArn,
@@ -132,6 +120,7 @@ export class ApiPlane extends cdk.Stack {
                   description: "Default response for DELETE /contact/{id}",
                 },
               },
+              "x-amazon-apigateway-auth": { type: "AWS_IAM" },
               "x-amazon-apigateway-integration": {
                 payloadFormatVersion: "2.0",
                 credentials: invokeLambdaRole.attrArn,
@@ -149,6 +138,7 @@ export class ApiPlane extends cdk.Stack {
                   description: "Default response for GET /contacts",
                 },
               },
+              "x-amazon-apigateway-auth": { type: "AWS_IAM" },
               "x-amazon-apigateway-integration": {
                 payloadFormatVersion: "2.0",
                 credentials: invokeLambdaRole.attrArn,
@@ -168,17 +158,12 @@ export class ApiPlane extends cdk.Stack {
         ],
       },
     });
-    console.log(props.tags);
 
     // create test stage
-    const testStage = new apiGwV2.CfnStage(
-      this,
-      "ChatAppContactsApiTestStage",
-      {
-        apiId: contactsApi.ref,
-        stageName: "test",
-        autoDeploy: true,
-      }
-    );
+    new apiGwV2.CfnStage(this, "ChatAppContactsApiTestStage", {
+      apiId: contactsApi.ref,
+      stageName: "test",
+      autoDeploy: true,
+    });
   }
 }

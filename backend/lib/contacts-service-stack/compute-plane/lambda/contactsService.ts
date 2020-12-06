@@ -36,19 +36,6 @@ export const patchContact = async (event: any) => {
     },
   };
 };
-export const putContact = async (event: any) => {
-  return {
-    status: 200,
-    body: {
-      id: event.pathParameters.id,
-      given_name: "Spencer",
-      family_name: "Duball",
-      email: "spencerduball@gmail.com",
-      sub: "2093948028340-39480243383-234439829483",
-      message: "User was successfully replaced with a PUT!",
-    },
-  };
-};
 export const deleteContact = async (event: any) => {
   return {
     status: 200,

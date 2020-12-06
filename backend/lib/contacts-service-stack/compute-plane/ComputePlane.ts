@@ -110,21 +110,6 @@ export class ComputePlane extends cdk.Stack {
         description: "This function patches a ChatApp contact by ID.",
       }
     );
-    this.lambda.putContact = new lambda.CfnFunction(
-      this,
-      "ChatAppPutContactLambda",
-      {
-        code: {
-          s3Bucket: lambdaS3AssetsZip.s3BucketName,
-          s3Key: lambdaS3AssetsZip.s3ObjectKey,
-        },
-        handler: "contactsService.putContact",
-        runtime: "nodejs12.x",
-        role: dynamoDbWriteRole.attrArn,
-        functionName: "ChatAppPutContactLambda",
-        description: "This function puts a ChatApp contact by ID.",
-      }
-    );
     this.lambda.deleteContact = new lambda.CfnFunction(
       this,
       "ChatAppDeleteContactLambda",
