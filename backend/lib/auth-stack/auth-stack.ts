@@ -1,7 +1,6 @@
 import * as cdk from "@aws-cdk/core";
 import * as cognito from "@aws-cdk/aws-cognito";
 import * as iam from "@aws-cdk/aws-iam";
-import * as lambda from "@aws-cdk/aws-lambda";
 import * as apiGwV2 from "@aws-cdk/aws-apigatewayv2";
 
 export class AuthStack extends cdk.Stack {
@@ -19,8 +18,6 @@ export class AuthStack extends cdk.Stack {
       emailConfiguration: {
         emailSendingAccount: "COGNITO_DEFAULT",
       },
-      // lambdaConfig: Will need to create a post authentication lambda to assign users to default group
-      // also make this lambda create a PROFILE with the sign up given_name & family_name
       mfaConfiguration: "OFF",
       policies: {
         passwordPolicy: {

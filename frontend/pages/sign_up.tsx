@@ -15,7 +15,7 @@ import {
   useToast,
   useDisclosure,
 } from "@chakra-ui/react";
-import { IoMdPerson, IoMdPeople, IoMdKey, IoMdAt } from "react-icons/io";
+import { IoMdKey, IoMdAt } from "react-icons/io";
 import BackgroundIllustrations from "components/svg/BackgroundIllustrations";
 import ChatAppLogo from "components/svg/ChatAppLogo";
 import NextLink from "next/link";
@@ -27,8 +27,6 @@ const minH = "500px";
 
 // types/interfaces
 interface SignUpInputs {
-  given_name: string;
-  family_name: string;
   email: string;
   password: string;
 }
@@ -57,7 +55,7 @@ const SignUp = () => {
     // set credentials so they are accessable by ConfirmUserModal
     setCredentials({ username: data.email, password: data.password });
     try {
-      await signUp({ email: data.email, password: data.password });
+      await signUp(data);
       onOpen();
     } catch (error) {
       toast({
@@ -117,38 +115,6 @@ const SignUp = () => {
               gridGap={1}
               onSubmit={handleSubmit(onSignUp)}
             >
-              <InputGroup>
-                <InputLeftElement
-                  children={<Icon as={IoMdPerson} color="brand.gray.900" />}
-                />
-                <Input
-                  placeholder="First name"
-                  bgColor="white"
-                  borderStyle="solid"
-                  borderColor="brand.gray.100"
-                  name="given_name"
-                  autoComplete="given-name"
-                  errorBorderColor="brand.red.600"
-                  ref={register({ required: true })}
-                  isInvalid={!!errors.given_name}
-                ></Input>
-              </InputGroup>
-              <InputGroup>
-                <InputLeftElement
-                  children={<Icon as={IoMdPeople} color="brand.gray.900" />}
-                />
-                <Input
-                  placeholder="Last name"
-                  bgColor="white"
-                  borderStyle="solid"
-                  borderColor="brand.gray.100"
-                  name="family_name"
-                  autoComplete="family-name"
-                  errorBorderColor="brand.red.600"
-                  isInvalid={!!errors.family_name}
-                  ref={register({ required: true })}
-                ></Input>
-              </InputGroup>
               <InputGroup>
                 <InputLeftElement
                   children={<Icon as={IoMdAt} color="brand.gray.900" />}

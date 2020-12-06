@@ -52,8 +52,6 @@ export const signIn = async (
 };
 
 export const signUp = async (input: {
-  // given_name: string;
-  // family_name: string;
   email: string;
   password: string;
 }): Promise<CognitoUser> => {
@@ -61,10 +59,6 @@ export const signUp = async (input: {
     const signUpResult = await Auth.signUp({
       username: input.email,
       password: input.password,
-      // attributes: {
-      //   given_name: input.given_name,
-      //   family_name: input.family_name,
-      // },
     });
     return signUpResult.user;
   } catch (error) {

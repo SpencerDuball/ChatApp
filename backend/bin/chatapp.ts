@@ -10,10 +10,13 @@ import { AuthStack } from "../lib/auth-stack/auth-stack";
 dotenv.config();
 
 const app = new cdk.App();
-new DbStack(app, "DbStack");
+const dbStack = new DbStack(app, "DbStack");
 const contactsServiceStack = new ContactsServiceStack(
   app,
-  "ContactsServiceStack"
+  "ContactsServiceStack",
+  {
+    ddbTable: dbStack.dynamoDbTable,
+  }
 );
 new AuthStack(app, "AuthStack", {
   contactsApi: contactsServiceStack.apiPlane.contactsApi,

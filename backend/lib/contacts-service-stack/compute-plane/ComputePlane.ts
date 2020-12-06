@@ -2,6 +2,7 @@ import * as cdk from "@aws-cdk/core";
 import * as assets from "@aws-cdk/aws-s3-assets";
 import * as iam from "@aws-cdk/aws-iam";
 import * as lambda from "@aws-cdk/aws-lambda";
+import * as dynamodb from "@aws-cdk/aws-dynamodb";
 import * as path from "path";
 
 export class ComputePlane extends cdk.Stack {
@@ -9,7 +10,11 @@ export class ComputePlane extends cdk.Stack {
     [key: string]: lambda.CfnFunction;
   } = {};
 
-  constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
+  constructor(
+    scope: cdk.Construct,
+    id: string,
+    props: cdk.StackProps & { ddbTable: dynamodb.CfnTable }
+  ) {
     super(scope, id, props);
 
     // upload lambda assets as a .zip to S3
@@ -39,6 +44,29 @@ export class ComputePlane extends cdk.Stack {
           ],
         }),
         managedPolicyArns: [AWSLambdaBasicExecutionRole],
+        policies: [
+          {
+            policyDocument: iam.PolicyDocument.fromJson({
+              Statement: [
+                {
+                  Effect: "Allow",
+                  Action: [
+                    "dynamodb:BatchGetItem",
+                    "dynamodb:ConditionCheckItem",
+                    "dynamodb:GetItem",
+                    "dynamodb:Query",
+                    "dynamodb:Scan",
+                  ],
+                  Resource: [
+                    `arn:aws:dynamodb:${this.region}:${this.account}:table/${props.ddbTable.ref}`,
+                    `arn:aws:dynamodb:${this.region}:${this.account}:table/${props.ddbTable.ref}/index`,
+                  ],
+                },
+              ],
+            }),
+            policyName: "ChatAppDDBReadPolicy",
+          },
+        ],
       }
     );
 
@@ -56,6 +84,35 @@ export class ComputePlane extends cdk.Stack {
           ],
         }),
         managedPolicyArns: [AWSLambdaBasicExecutionRole],
+        policies: [
+          {
+            policyDocument: iam.PolicyDocument.fromJson({
+              Statement: [
+                {
+                  Effect: "Allow",
+                  Action: [
+                    // read
+                    "dynamodb:BatchGetItem",
+                    "dynamodb:ConditionCheckItem",
+                    "dynamodb:GetItem",
+                    "dynamodb:Query",
+                    "dynamodb:Scan",
+                    // write
+                    "dynamodb:BatchWriteItem",
+                    "dynamodb:DeleteItem",
+                    "dynamodb:PutItem",
+                    "dynamodb:UpdateItem",
+                  ],
+                  Resource: [
+                    `arn:aws:dynamodb:${this.region}:${this.account}:table/${props.ddbTable.ref}`,
+                    `arn:aws:dynamodb:${this.region}:${this.account}:table/${props.ddbTable.ref}/index`,
+                  ],
+                },
+              ],
+            }),
+            policyName: "ChatAppDDBReadPolicy",
+          },
+        ],
       }
     );
 

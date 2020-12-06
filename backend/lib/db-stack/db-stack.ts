@@ -5,6 +5,7 @@ const S = (attributeName: string) => ({ attributeName, attributeType: "S" });
 
 export class DbStack extends cdk.Stack {
   public dynamoDbTable: dynamodb.CfnTable;
+
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
