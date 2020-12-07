@@ -1,5 +1,21 @@
+import { DynamoDBClient, GetItemCommand } from "@aws-sdk/client-dynamodb";
+
+const parseCognitoSub = (amr: string[]) => {
+  const [cognitoString] = amr.filter((value) =>
+    value.includes("CognitoSignIn")
+  );
+  return cognitoString.split(":").pop();
+};
+
 // contact
 export const getContact = async (event: any) => {
+  console.log(event);
+  console.log(event.requestContext.authorizer);
+  console.log(event.requestContext.authorizer.iam.cognitoIdentity.amr);
+  console.log(
+    parseCognitoSub(event.requestContext.authorizer.iam.cognitoIdentity.amr)
+  );
+
   return {
     status: 200,
     body: {
@@ -12,6 +28,8 @@ export const getContact = async (event: any) => {
   };
 };
 export const postContact = async (event: any) => {
+  console.log(event);
+
   return {
     status: 200,
     body: {
@@ -24,6 +42,8 @@ export const postContact = async (event: any) => {
   };
 };
 export const patchContact = async (event: any) => {
+  console.log(event);
+
   return {
     status: 200,
     body: {
@@ -37,6 +57,8 @@ export const patchContact = async (event: any) => {
   };
 };
 export const deleteContact = async (event: any) => {
+  console.log(event);
+
   return {
     status: 200,
     body: {
@@ -52,6 +74,8 @@ export const deleteContact = async (event: any) => {
 
 // contacts
 export const getContacts = async (event: any) => {
+  console.log(event);
+
   return {
     status: 200,
     body: [
