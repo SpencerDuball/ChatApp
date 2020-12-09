@@ -1,5 +1,6 @@
 import { DynamoDBClient, GetItemCommand } from "@aws-sdk/client-dynamodb";
 
+// helpers
 const parseCognitoSub = (amr: string[]) => {
   const [cognitoString] = amr.filter((value) =>
     value.includes("CognitoSignIn")
