@@ -1,6 +1,10 @@
 import { IAppContextState, IAppContextReducerAction } from "./types";
+import { Auth } from "aws-amplify";
 
-export default (
+const idTokenKey = (sub: string) =>
+  `CognitoIdentityServiceProvider.${process.env.NEXT_PUBLIC_COGNITO_APP_CLIENT_ID}.${sub}.idToken`;
+
+const reducer = (
   state: IAppContextState,
   action: IAppContextReducerAction
 ): IAppContextState => {
@@ -17,3 +21,5 @@ export default (
     }
   }
 };
+
+export default reducer;

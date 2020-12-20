@@ -22,6 +22,11 @@ import { ChatAppIcon } from "@frontend/components/svg/icon/ChatAppIcon";
 import { useForm } from "react-hook-form";
 import { ConfirmUserModal } from "@frontend/components/overlay/ConfirmUserModal";
 import { signUp } from "@frontend/context/app-context/context";
+import { Amplify, withSSRContext } from "aws-amplify";
+import awsConfig from "../aws-config";
+
+// Must do this for every page until issue is resolved: https://github.com/vercel/next.js/issues/16977
+Amplify.configure({ ...awsConfig, ssr: true });
 
 interface SignUpInputs {
   email: string;
@@ -59,7 +64,7 @@ const SignUp = () => {
         title: error.code,
         description: error.message,
         status: "error",
-        duration: 500,
+        duration: 5000,
         isClosable: true,
         position: "top",
       });
@@ -191,10 +196,15 @@ const SignUp = () => {
 };
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
-  // validate JWT IdToken
-  //    if (signedIn) redirect("/messenger")
+  const SSR = withSSRContext({ req: context.req });
 
-  return { props: {} };
+  // redirect user to '/messenger' if signed in
+  try {
+    const user = await SSR.Auth.currentAuthenticatedUser();
+    return { redirect: { destination: "/messenger", permanent: false } };
+  } catch (error) {
+    return { props: {} };
+  }
 }
 
 export default SignUp;

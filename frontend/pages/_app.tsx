@@ -5,7 +5,7 @@ import Amplify from "aws-amplify";
 import awsConfig from "../aws-config";
 
 // setup authentication
-Amplify.configure(awsConfig);
+Amplify.configure({ ...awsConfig, ssr: true });
 
 const _app = ({ Component, pageProps }) => {
   return (

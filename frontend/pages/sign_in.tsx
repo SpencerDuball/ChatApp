@@ -1,3 +1,5 @@
+import { Amplify, withSSRContext } from "aws-amplify";
+import awsConfig from "../aws-config";
 import { useState, BaseSyntheticEvent, useContext } from "react";
 import { GetServerSidePropsContext } from "next";
 import Head from "next/head";
@@ -23,6 +25,9 @@ import { useForm } from "react-hook-form";
 import { ConfirmUserModal } from "@frontend/components/overlay/ConfirmUserModal";
 import { signIn } from "@frontend/context/app-context/context";
 import { AppContext } from "@frontend/context/app-context/context";
+
+// Must do this for every page until issue is resolved: https://github.com/vercel/next.js/issues/16977
+Amplify.configure({ ...awsConfig, ssr: true });
 
 interface SignInInputs {
   email: string;
@@ -212,10 +217,15 @@ const SignIn = () => {
 };
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
-  // validate JWT IdToken
-  //    if (signedIn) redirect("/messenger")
+  const SSR = withSSRContext({ req: context.req });
 
-  return { props: {} };
+  // redirect user to '/messenger' if signed in
+  try {
+    const user = await SSR.Auth.currentAuthenticatedUser();
+    return { redirect: { destination: "/messenger", permanent: false } };
+  } catch (error) {
+    return { props: {} };
+  }
 }
 
 export default SignIn;
