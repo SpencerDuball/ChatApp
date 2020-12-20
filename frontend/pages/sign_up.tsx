@@ -59,6 +59,7 @@ const SignUp = () => {
 
     try {
       await signUp(data);
+      onOpen();
     } catch (error) {
       toast({
         title: error.code,

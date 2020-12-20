@@ -15,6 +15,7 @@ export class AuthStack extends cdk.Stack {
       accountRecoverySetting: {
         recoveryMechanisms: [{ name: "verified_email", priority: 1 }],
       },
+      autoVerifiedAttributes: ["email"],
       emailConfiguration: {
         emailSendingAccount: "COGNITO_DEFAULT",
       },
