@@ -1,5 +1,6 @@
 import React from "react";
 import { Story, Meta } from "@storybook/react";
+import { Box } from "@chakra-ui/react";
 
 import {
   HeroBackground,
@@ -17,6 +18,19 @@ const Template: Story<HeroBackgroundProps> = (args) => (
 
 export const Primary = Template.bind({});
 Primary.args = {
-  w: ["200px", "300px", "400px"],
+  h: "300px",
   fill: "red.200",
 };
+
+export const Responsive = () => (
+  <Box h="100vh" w="100%" position="relative" overflow="hidden">
+    <HeroBackground
+      h="100%"
+      fill="brand.gold.50"
+      position="absolute"
+      top="50%"
+      left="50%"
+      transform="translate(-50%, -50%)"
+    />
+  </Box>
+);
