@@ -4,6 +4,9 @@ import { AppContextProvider } from "context/app-context/context";
 import Amplify from "aws-amplify";
 import awsConfig from "../aws-config";
 
+// setup authentication
+Amplify.configure(awsConfig);
+
 const _app = ({ Component, pageProps }) => {
   return (
     <AppContextProvider>
