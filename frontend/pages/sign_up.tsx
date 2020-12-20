@@ -13,11 +13,15 @@ import {
   InputRightElement,
   InputGroup,
   Button,
+  useToast,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { IoKey, IoAtCircle } from "react-icons/io5";
 import { HeroBackground } from "@frontend/components/svg/background/HeroBackground";
 import { ChatAppIcon } from "@frontend/components/svg/icon/ChatAppIcon";
 import { useForm } from "react-hook-form";
+import { ConfirmUserModal } from "@frontend/components/overlay/ConfirmUserModal";
+import { signUp } from "@frontend/context/app-context/context";
 
 interface SignUpInputs {
   email: string;
@@ -29,13 +33,40 @@ const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
   const toggleShowPassword = () => setShowPassword(!showPassword);
 
+  // modal
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [credentials, setCredentials] = useState({
+    username: "",
+    password: "",
+  });
+
+  // toast
+  const toast = useToast();
+
   // form
   const { register, handleSubmit, errors } = useForm<SignUpInputs>();
   const onSubmit = async (
     data: SignUpInputs,
     e: BaseSyntheticEvent<HTMLFormElement>
   ) => {
-    console.log(data);
+    // set crednetials so they are accessible by ConfirmUserModal
+    setCredentials({ username: data.email, password: data.password });
+
+    try {
+      await signUp(data);
+    } catch (error) {
+      toast({
+        title: error.code,
+        description: error.message,
+        status: "error",
+        duration: 500,
+        isClosable: true,
+        position: "top",
+      });
+    }
+
+    // reset the form
+    e.target.reset();
   };
 
   return (
@@ -43,6 +74,12 @@ const SignUp = () => {
       <Head>
         <title>Sign Up - ChatApp</title>
       </Head>
+      <ConfirmUserModal
+        isOpen={isOpen}
+        onOpen={onOpen}
+        onClose={onClose}
+        credentials={credentials}
+      />
       <Box as="main" h="100%" w="100%" position="fixed" overflow="hidden">
         <HeroBackground
           h={["700px", "1000px"]}
