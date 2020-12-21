@@ -1,7 +1,7 @@
-import { Box, BoxProps, useToken } from "@chakra-ui/react";
+import { Icon, IconProps, useToken } from "@chakra-ui/react";
 import filterProps from "@frontend/util/filterProps";
 
-export interface ChatAppIconProps extends BoxProps {
+export interface ChatAppIconProps extends IconProps {
   primaryColor: string; // TODO: need to update interface from "string" to colors
   secondaryColor: string; // TODO: need to update interface from "string" to colors
   textColor: string; // TODO: need to up date interface from "string" to colors
@@ -15,8 +15,7 @@ export const ChatAppIcon = (props: ChatAppIconProps) => {
   ]);
 
   return (
-    <Box
-      as="svg"
+    <Icon
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 128 128"
       {...filterProps(props, ["primaryColor", "secondaryColor", "textColor"])}
@@ -39,7 +38,7 @@ export const ChatAppIcon = (props: ChatAppIconProps) => {
         d="M96.086 48.095h2.812l.399-11.824h-3.61l.399 11.824zM98.863 50.45c-.344-.335-.8-.503-1.371-.503-.563 0-1.02.171-1.371.515-.344.336-.516.762-.516 1.278 0 .515.172.941.516 1.277.352.336.809.504 1.371.504.57 0 1.027-.168 1.371-.504.352-.336.527-.762.527-1.277 0-.524-.175-.954-.527-1.29z"
         fill={textColor}
       />
-    </Box>
+    </Icon>
   );
 };
 ChatAppIcon.defaultProps = {
