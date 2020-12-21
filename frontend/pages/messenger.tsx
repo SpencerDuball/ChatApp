@@ -29,7 +29,6 @@ const Messenger = () => {
         bgColor="red.200"
         gridRow="1 / span 1"
         gridColumn={{ base: "1 / span 1", md: "2 / span 1" }}
-        display={{ base: "hidden", md: "block" }}
       />
     </Grid>
   );
