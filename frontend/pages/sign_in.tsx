@@ -4,6 +4,7 @@ import { useState, BaseSyntheticEvent, useContext } from "react";
 import { GetServerSidePropsContext } from "next";
 import Head from "next/head";
 import NextLink from "next/link";
+import { useRouter } from "next/router";
 import {
   Box,
   Center,
@@ -52,6 +53,9 @@ const SignIn = () => {
   // auth context
   const [, dispatch] = useContext(AppContext);
 
+  // router
+  const router = useRouter();
+
   // form
   const { register, handleSubmit, errors } = useForm<SignInInputs>();
   const onSubmit = async (
@@ -71,6 +75,7 @@ const SignIn = () => {
         isClosable: true,
         position: "top",
       });
+      router.push("/messenger");
     } catch (error) {
       switch (error.code) {
         case "UserNotConfirmedException": {

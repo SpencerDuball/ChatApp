@@ -1,4 +1,4 @@
-import { BaseSyntheticEvent, useContext, useRef } from "react";
+import { BaseSyntheticEvent, useContext } from "react";
 import { signIn, AppContext } from "@frontend/context/app-context/context";
 import {
   Modal,
