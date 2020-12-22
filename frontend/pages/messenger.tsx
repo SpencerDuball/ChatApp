@@ -2,6 +2,7 @@ import { GetServerSidePropsContext } from "next";
 import { Amplify, withSSRContext } from "aws-amplify";
 import awsConfig from "../aws-config";
 import { Box, Grid } from "@chakra-ui/react";
+import { Drawer } from "@frontend/components/screen/drawer/Drawer";
 
 // Must do this for every page until issue is resolved: https://github.com/vercel/next.js/issues/16977
 Amplify.configure({ ...awsConfig, ssr: true });
@@ -19,9 +20,10 @@ const Messenger = () => {
         md: "320px auto",
         lg: "350px auto",
       }}
+      gridTemplateRows="100%"
     >
-      <Box
-        bgColor="blue.200"
+      <Drawer
+        h="100%"
         gridRow="1 / span 1"
         gridColumn={{ base: "1 / span 1", md: "1 / span 1" }}
       />

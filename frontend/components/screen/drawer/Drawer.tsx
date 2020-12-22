@@ -7,7 +7,7 @@ import { Footer } from "@frontend/components/screen/drawer/Footer";
 
 export interface DrawerProps extends BoxProps {}
 
-export const Drawer = (props: BoxProps) => {
+export const Drawer = (props: DrawerProps) => {
   // use refs to collect header & footer height values
   const headerRef = useRef(null);
   const footerRef = useRef(null);
@@ -15,6 +15,9 @@ export const Drawer = (props: BoxProps) => {
 
   // header controlled input
   const [headerValue, setHeaderValue] = useState("");
+
+  // drawer control
+  const [currentDrawer, setCurrentDrawer] = useState("chats");
 
   // TODO: extract to hook
   useLayoutEffect(() => {
@@ -27,7 +30,7 @@ export const Drawer = (props: BoxProps) => {
   }, []);
 
   return (
-    <Box bgColor="brand.gray.50" {...props} position="relative">
+    <Box bgColor="brand.gray.50" position="relative" {...props}>
       <Header
         ref={headerRef}
         position="absolute"
@@ -48,7 +51,7 @@ export const Drawer = (props: BoxProps) => {
           <ContactItem sub="809df20" givenName="Robert" familyName="Duvall" />
           <ContactItem sub="809dfs0" givenName="Russell" familyName="Stewart" />
           <ContactItem
-            sub="809dfs2"
+            sub="82"
             isSelected
             givenName="Tyfus"
             familyName="Kerfa"
@@ -59,6 +62,10 @@ export const Drawer = (props: BoxProps) => {
           <ContactItem sub="kdjlfsp" givenName="Donald" familyName="Trump" />
           <ContactItem sub="1093fkl" givenName="Carrot" familyName="Stick" />
           <ContactItem sub="dlksf" givenName="Morgan" familyName="Freeman" />
+          <ContactItem sub="djfs00-" givenName="Flem" familyName="Bot" />
+          <ContactItem sub="1jofij" givenName="Tracy" familyName="Morgan" />
+          <ContactItem sub="4kjfs" givenName="Kagney" familyName="White" />
+          <ContactItem sub="490fj" givenName="Riley" familyName="Racker" />
         </VStack>
       </Box>
       <Footer ref={footerRef} position="absolute" bottom="0" left="0">
@@ -68,7 +75,17 @@ export const Drawer = (props: BoxProps) => {
           _focus={{ boxShadow: "none" }}
           _active={{ bg: "none" }}
           _hover={{ bg: "none" }}
-          icon={<Icon as={IoChatbubble} fill="brand.gray.100" h={6} w={6} />}
+          onClick={() => setCurrentDrawer("chats")}
+          icon={
+            <Icon
+              as={IoChatbubble}
+              fill={
+                currentDrawer === "chats" ? "brand.red.100" : "brand.gray.100"
+              }
+              h={6}
+              w={6}
+            />
+          }
         />
         <IconButton
           aria-label="Toggle to Contacts"
@@ -76,7 +93,19 @@ export const Drawer = (props: BoxProps) => {
           _focus={{ boxShadow: "none" }}
           _active={{ bg: "none" }}
           _hover={{ bg: "none" }}
-          icon={<Icon as={IoPeople} fill="brand.gray.100" h={6} w={6} />}
+          onClick={() => setCurrentDrawer("contacts")}
+          icon={
+            <Icon
+              as={IoPeople}
+              fill={
+                currentDrawer === "contacts"
+                  ? "brand.red.100"
+                  : "brand.gray.100"
+              }
+              h={6}
+              w={6}
+            />
+          }
         />
       </Footer>
     </Box>

@@ -12,8 +12,11 @@ export const Footer = forwardRef<HTMLDivElement, FooterProps>((props, ref) => {
       w="full"
       py={5}
       zIndex="docked"
-      bgColor={hexToRGB(brandGray50, 0.85)}
-      style={{ backdropFilter: "blur(20px)" }}
+      bgColor={hexToRGB(brandGray50, 0.65)}
+      style={{
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+      }}
       gridAutoFlow="column"
       justifyContent="center"
       gap="75px"

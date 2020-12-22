@@ -34,9 +34,10 @@ export const Header = forwardRef<HTMLDivElement, HeaderProps>((props, ref) => {
       py={4}
       w="full"
       zIndex="docked"
-      bgColor={hexToRGB(brandGray50, 0.85)}
+      bgColor={hexToRGB(brandGray50, 0.65)}
       style={{
         backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
       }}
       ref={ref}
       {...filterProps(props, [
