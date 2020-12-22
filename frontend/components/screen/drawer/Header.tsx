@@ -9,12 +9,14 @@ import {
   InputGroup,
   InputLeftElement,
   Input,
+  useToken,
 } from "@chakra-ui/react";
 import { ChangeEvent, forwardRef } from "react";
 import { ChatAppIcon } from "@frontend/components/svg/icon/ChatAppIcon";
 import { IconButton } from "@frontend/components/button/IconButton";
 import { IoPersonAdd, IoSearch } from "react-icons/io5";
 import filterProps from "@frontend/util/filterProps";
+import hexToRGB from "@frontend/util/hexToRGB";
 
 export interface HeaderProps extends StackProps {
   profilePhotoUrl?: string;
@@ -24,18 +26,18 @@ export interface HeaderProps extends StackProps {
 }
 
 export const Header = forwardRef<HTMLDivElement, HeaderProps>((props, ref) => {
+  const [brandGray50] = useToken("colors", ["brand.gray.50"]);
+
   return (
     <VStack
       px={3}
       py={4}
-      position="absolute"
-      top="0"
-      left="0"
       w="full"
-      bgColor="brand.gray.50"
-      opacity="0.85"
       zIndex="docked"
-      style={{ backdropFilter: "blur(30px)" }}
+      bgColor={hexToRGB(brandGray50, 0.85)}
+      style={{
+        backdropFilter: "blur(20px)",
+      }}
       ref={ref}
       {...filterProps(props, [
         "profilePhotoUrl",

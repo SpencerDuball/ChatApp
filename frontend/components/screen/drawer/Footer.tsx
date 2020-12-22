@@ -1,22 +1,26 @@
 import { forwardRef } from "react";
-import { Grid, GridProps, Icon } from "@chakra-ui/react";
-import { IconButton } from "@frontend/components/button/IconButton";
+import { Grid, GridProps, useToken } from "@chakra-ui/react";
+import hexToRGB from "@frontend/util/hexToRGB";
 
 export interface FooterProps extends GridProps {}
 
 export const Footer = forwardRef<HTMLDivElement, FooterProps>((props, ref) => {
+  const [brandGray50] = useToken("colors", ["brand.gray.50"]);
+
   return (
     <Grid
-      position="absolute"
-      top="0"
-      left="0"
       w="full"
-      bgColor="brand.gray.50"
-      opacity="0.85"
+      py={5}
       zIndex="docked"
-      style={{ backdropFilter: "blur(30px)" }}
+      bgColor={hexToRGB(brandGray50, 0.85)}
+      style={{ backdropFilter: "blur(20px)" }}
+      gridAutoFlow="column"
+      justifyContent="center"
+      gap="75px"
       ref={ref}
       {...props}
-    ></Grid>
+    >
+      {props.children}
+    </Grid>
   );
 });
