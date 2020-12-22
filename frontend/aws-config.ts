@@ -1,7 +1,7 @@
 const awsConfig = {
   Auth: {
     // REQUIRED only for Federated Authentication - Amazon Cognito Identity Pool ID
-    // identityPoolId: "XX-XXXX-X:XXXXXXXX-XXXX-1234-abcd-1234567890ab",
+    identityPoolId: process.env.NEXT_PUBLIC_COGNITO_IDENTITY_POOL_ID,
 
     // REQUIRED - Amazon Cognito Region
     region: process.env.NEXT_PUBLIC_COGNITO_REGION,

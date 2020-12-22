@@ -1,5 +1,5 @@
 import { BaseSyntheticEvent, useContext } from "react";
-import { signIn, AppContext } from "context/app-context/AppContext";
+import { signIn, AppContext } from "@frontend/context/app-context/context";
 import {
   Modal,
   ModalOverlay,
@@ -28,7 +28,7 @@ interface IConfirmEmailInput {
   otc_6: string;
 }
 
-const ConfirmUserModal = (props: {
+export interface ConfirmUserModalProps {
   isOpen: boolean;
   onOpen: () => void;
   onClose: () => void;
@@ -36,8 +36,10 @@ const ConfirmUserModal = (props: {
     username: string;
     password: string;
   };
-}) => {
-  const { register, handleSubmit, errors } = useForm<IConfirmEmailInput>();
+}
+
+export const ConfirmUserModal = (props: ConfirmUserModalProps) => {
+  const { register, handleSubmit } = useForm<IConfirmEmailInput>();
   const toast = useToast();
   const [, dispatch] = useContext(AppContext);
   const router = useRouter();
@@ -160,5 +162,3 @@ const ConfirmUserModal = (props: {
     </Modal>
   );
 };
-
-export default ConfirmUserModal;

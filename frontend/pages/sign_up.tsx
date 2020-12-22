@@ -1,13 +1,15 @@
-import { BaseSyntheticEvent, useState, useContext } from "react";
-import { AppContext, signUp } from "context/app-context/AppContext";
+import { useState, BaseSyntheticEvent } from "react";
+import { GetServerSidePropsContext } from "next";
 import Head from "next/head";
+import NextLink from "next/link";
+import router from "next/router";
 import {
   Box,
   Center,
   Grid,
   Link,
-  Input,
   Icon,
+  Input,
   InputLeftElement,
   InputRightElement,
   InputGroup,
@@ -15,20 +17,19 @@ import {
   useToast,
   useDisclosure,
 } from "@chakra-ui/react";
-import { IoMdPerson, IoMdPeople, IoMdKey, IoMdAt } from "react-icons/io";
-import BackgroundIllustrations from "components/svg/BackgroundIllustrations";
-import ChatAppLogo from "components/svg/ChatAppLogo";
-import NextLink from "next/link";
+import { IoKey, IoAtCircle } from "react-icons/io5";
+import { HeroBackground } from "@frontend/components/svg/background/HeroBackground";
+import { ChatAppIcon } from "@frontend/components/svg/icon/ChatAppIcon";
 import { useForm } from "react-hook-form";
-import ConfirmUserModal from "components/modal/ConfirmUserModal";
+import { ConfirmUserModal } from "@frontend/components/overlay/ConfirmUserModal";
+import { signUp } from "@frontend/context/app-context/context";
+import { Amplify, withSSRContext } from "aws-amplify";
+import awsConfig from "../aws-config";
 
-// constants
-const minH = "500px";
+// Must do this for every page until issue is resolved: https://github.com/vercel/next.js/issues/16977
+Amplify.configure({ ...awsConfig, ssr: true });
 
-// types/interfaces
 interface SignUpInputs {
-  given_name: string;
-  family_name: string;
   email: string;
   password: string;
 }
@@ -45,17 +46,18 @@ const SignUp = () => {
     password: "",
   });
 
-  // add toast
+  // toast
   const toast = useToast();
 
-  // control form
+  // form
   const { register, handleSubmit, errors } = useForm<SignUpInputs>();
-  const onSignUp = async (
+  const onSubmit = async (
     data: SignUpInputs,
     e: BaseSyntheticEvent<HTMLFormElement>
   ) => {
-    // set credentials so they are accessable by ConfirmUserModal
+    // set crednetials so they are accessible by ConfirmUserModal
     setCredentials({ username: data.email, password: data.password });
+
     try {
       await signUp(data);
       onOpen();
@@ -85,73 +87,43 @@ const SignUp = () => {
         onClose={onClose}
         credentials={credentials}
       />
-      <Box as="main" h="100vh" w="100%" position="relative" minH={minH}>
-        <BackgroundIllustrations
+      <Box as="main" h="100%" w="100%" position="fixed" overflow="hidden">
+        <HeroBackground
+          h={["700px", "1000px"]}
           fill="brand.gold.50"
-          position="fixed"
-          h="100%"
-          minH={minH}
+          position="absolute"
+          top="50%"
           left="50%"
-          transform="translateX(-50%)"
+          transform="translate(-50%, -50%)"
           zIndex="hide"
         />
         <Center h="100%" w="100%">
-          <Grid templateRows="max-content max-content" gap={10}>
+          <Grid autoFlow="row" gap={8}>
             <Center>
               <NextLink href="/" passHref>
                 <Link>
-                  <ChatAppLogo
+                  <ChatAppIcon
+                    h={["128px"]}
+                    w={["128px"]}
                     primaryColor="brand.red.200"
-                    secondaryColor="brand.red.600"
+                    secondaryColor="brand.red.500"
                     textColor="brand.gray.700"
-                    h={["128px", "156px"]}
-                    w={["128px", "156px"]}
                   />
                 </Link>
               </NextLink>
             </Center>
             <Grid
               as="form"
-              gridAutoFlow="row"
               w={["250px", "300px"]}
+              gridAutoFlow="row"
               gridGap={1}
-              onSubmit={handleSubmit(onSignUp)}
+              onSubmit={handleSubmit(onSubmit)}
             >
               <InputGroup>
                 <InputLeftElement
-                  children={<Icon as={IoMdPerson} color="brand.gray.900" />}
-                />
-                <Input
-                  placeholder="First name"
-                  bgColor="white"
-                  borderStyle="solid"
-                  borderColor="brand.gray.100"
-                  name="given_name"
-                  autoComplete="given-name"
-                  errorBorderColor="brand.red.600"
-                  ref={register({ required: true })}
-                  isInvalid={!!errors.given_name}
-                ></Input>
-              </InputGroup>
-              <InputGroup>
-                <InputLeftElement
-                  children={<Icon as={IoMdPeople} color="brand.gray.900" />}
-                />
-                <Input
-                  placeholder="Last name"
-                  bgColor="white"
-                  borderStyle="solid"
-                  borderColor="brand.gray.100"
-                  name="family_name"
-                  autoComplete="family-name"
-                  errorBorderColor="brand.red.600"
-                  isInvalid={!!errors.family_name}
-                  ref={register({ required: true })}
-                ></Input>
-              </InputGroup>
-              <InputGroup>
-                <InputLeftElement
-                  children={<Icon as={IoMdAt} color="brand.gray.900" />}
+                  children={
+                    <Icon as={IoAtCircle} boxSize={5} color="brand.gray.700" />
+                  }
                 />
                 <Input
                   placeholder="Email"
@@ -159,15 +131,16 @@ const SignUp = () => {
                   borderStyle="solid"
                   borderColor="brand.gray.100"
                   name="email"
-                  autoComplete="email"
                   isInvalid={!!errors.email}
                   errorBorderColor="brand.red.600"
                   ref={register({ required: true, pattern: /\S+@\S+\.\S+/ })}
-                ></Input>
+                />
               </InputGroup>
               <InputGroup>
                 <InputLeftElement
-                  children={<Icon as={IoMdKey} color="brand.gray.900" />}
+                  children={
+                    <Icon as={IoKey} boxSize={5} color="brand.gray.900" />
+                  }
                 />
                 <Input
                   type={showPassword ? "text" : "password"}
@@ -180,7 +153,7 @@ const SignUp = () => {
                   isInvalid={!!errors.password}
                   errorBorderColor="brand.red.600"
                   ref={register({ required: true, minLength: 8 })}
-                ></Input>
+                />
                 <InputRightElement>
                   <Button
                     onClick={toggleShowPassword}
@@ -197,9 +170,7 @@ const SignUp = () => {
                 bgColor="brand.red.200"
                 color="brand.gray.700"
                 type="submit"
-                _hover={{
-                  bgColor: "brand.red.300",
-                }}
+                _hover={{ bgColor: "brand.red.300" }}
               >
                 Sign Up
               </Button>
@@ -216,9 +187,7 @@ const SignUp = () => {
             borderBottomWidth="2px"
             borderBottomStyle="solid"
             borderColor="brand.red.300"
-            _hover={{
-              textDecoration: "none",
-            }}
+            _hover={{ textDecoration: "none" }}
           >
             Sign In
           </Link>
@@ -227,5 +196,17 @@ const SignUp = () => {
     </>
   );
 };
+
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+  const SSR = withSSRContext({ req: context.req });
+
+  // redirect user to '/messenger' if signed in
+  try {
+    const user = await SSR.Auth.currentAuthenticatedUser();
+    return { redirect: { destination: "/messenger", permanent: false } };
+  } catch (error) {
+    return { props: {} };
+  }
+}
 
 export default SignUp;

@@ -19,9 +19,9 @@
     "jsx": "preserve",
     "baseUrl": ".",
     "paths": {
-      "util": ["util/*"],
-      "components": ["components/*"],
-      "context": ["context/*"]
+      "@frontend/util/*": ["util/*"],
+      "@frontend/components/*": ["components/*"],
+      "@frontend/context/*": ["context/*"]
     }
   },
   "include": [

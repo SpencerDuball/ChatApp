@@ -1,17 +1,14 @@
 import Head from "next/head";
-import { Box } from "@chakra-ui/react";
 
-const Index = () => {
+const Home = () => {
   return (
     <>
       <Head>
-        <title>ChatApp</title>
+        <title>Create Next App</title>
       </Head>
-      <Box width="100%" height="100%" bgColor="brand.red.100">
-        Index Page
-      </Box>
+      <div>Hello there!</div>
     </>
   );
 };
 
-export default Index;
+export default Home;
