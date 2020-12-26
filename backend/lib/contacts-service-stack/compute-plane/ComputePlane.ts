@@ -25,6 +25,15 @@ export class ComputePlane extends cdk.Stack {
       ),
     });
 
+    // upload lambda layer assets as a .zip to S3
+    const contactsServiceLayerS3Assets = new assets.Asset(
+      this,
+      "ChatAppLambdaLayerAssets",
+      {
+        path: path.join(__dirname, "layers/contacts-service-layer"),
+      }
+    );
+
     ////////////////////////////////////////////////////////////////////////
     // create roles for lambda
     ////////////////////////////////////////////////////////////////////////
@@ -117,86 +126,85 @@ export class ComputePlane extends cdk.Stack {
     );
 
     ////////////////////////////////////////////////////////////////////////
+    // Create lambda layers
+    ////////////////////////////////////////////////////////////////////////
+    const computeServiceLambdaLayer = new lambda.CfnLayerVersion(
+      this,
+      "ComputeServiceLambdaLayer",
+      {
+        compatibleRuntimes: ["nodejs12.x"],
+        content: {
+          s3Bucket: contactsServiceLayerS3Assets.s3BucketName,
+          s3Key: contactsServiceLayerS3Assets.s3ObjectKey,
+        },
+        description: "This is a lambdah laier.",
+        layerName: "ComputeServiceLambdaLayer",
+      }
+    );
+    const computeServiceLayerPermission = new lambda.CfnLayerVersionPermission(
+      this,
+      "ComputeServiceLayerPermission",
+      {
+        action: "lambda:GetLayerVersion",
+        layerVersionArn: computeServiceLambdaLayer.ref,
+        principal: this.account,
+      }
+    );
+
+    ////////////////////////////////////////////////////////////////////////
     // Create lambda functions
     ////////////////////////////////////////////////////////////////////////
+    const computePlaneLambda = (
+      name: string,
+      handler: string,
+      description: string
+    ) => {
+      return new lambda.CfnFunction(this, name, {
+        code: {
+          s3Bucket: lambdaS3AssetsZip.s3BucketName,
+          s3Key: lambdaS3AssetsZip.s3ObjectKey,
+        },
+        environment: {
+          variables: {
+            DDB_TABLE_NAME: props.ddbTable.tableName!,
+            REGION: this.region,
+          },
+        },
+        layers: [computeServiceLambdaLayer.ref],
+        handler,
+        runtime: "nodejs12.x",
+        role: dynamoDbReadRole.attrArn,
+        functionName: name,
+        description,
+      });
+    };
 
-    ////////////////////////////////////////////////////////////////////////
     // contactService
-    this.lambda.getContact = new lambda.CfnFunction(
-      this,
+    this.lambda.getContact = computePlaneLambda(
       "ChatAppGetContactLambda",
-      {
-        code: {
-          s3Bucket: lambdaS3AssetsZip.s3BucketName,
-          s3Key: lambdaS3AssetsZip.s3ObjectKey,
-        },
-        handler: "contactsService.getContact",
-        runtime: "nodejs12.x",
-        role: dynamoDbReadRole.attrArn,
-        functionName: "ChatAppGetContactLambda",
-        description: "This function returns a ChatApp contact by ID.",
-      }
+      "contactsService.getContact",
+      "This function returns a ChatApp contact by ID."
     );
-    this.lambda.postContact = new lambda.CfnFunction(
-      this,
+    this.lambda.postContact = computePlaneLambda(
       "ChatAppPostContactLambda",
-      {
-        code: {
-          s3Bucket: lambdaS3AssetsZip.s3BucketName,
-          s3Key: lambdaS3AssetsZip.s3ObjectKey,
-        },
-        handler: "contactsService.postContact",
-        runtime: "nodejs12.x",
-        role: dynamoDbWriteRole.attrArn,
-        functionName: "ChatAppPostContactLambda",
-        description: "This function creates a ChatApp contact.",
-      }
+      "contactsService.postContact",
+      "This function creates a ChatApp contact."
     );
-    this.lambda.patchContact = new lambda.CfnFunction(
-      this,
+    this.lambda.patchContact = computePlaneLambda(
       "ChatAppPatchContactLambda",
-      {
-        code: {
-          s3Bucket: lambdaS3AssetsZip.s3BucketName,
-          s3Key: lambdaS3AssetsZip.s3ObjectKey,
-        },
-        handler: "contactsService.patchContact",
-        runtime: "nodejs12.x",
-        role: dynamoDbWriteRole.attrArn,
-        functionName: "ChatAppPatchContactLambda",
-        description: "This function patches a ChatApp contact by ID.",
-      }
+      "contactsService.patchContact",
+      "This function patches a ChatApp contact by ID."
     );
-    this.lambda.deleteContact = new lambda.CfnFunction(
-      this,
+    this.lambda.deleteContact = computePlaneLambda(
       "ChatAppDeleteContactLambda",
-      {
-        code: {
-          s3Bucket: lambdaS3AssetsZip.s3BucketName,
-          s3Key: lambdaS3AssetsZip.s3ObjectKey,
-        },
-        handler: "contactsService.deleteContact",
-        runtime: "nodejs12.x",
-        role: dynamoDbWriteRole.attrArn,
-        functionName: "ChatAppDeleteContactLambda",
-        description: "This function deletes a ChatApp contact by ID.",
-      }
+      "contactsService.deleteContact",
+      "This function deletes a ChatApp contact by ID."
     );
 
-    this.lambda.getContacts = new lambda.CfnFunction(
-      this,
+    this.lambda.getContacts = computePlaneLambda(
       "ChatAppGetContactsLambda",
-      {
-        code: {
-          s3Bucket: lambdaS3AssetsZip.s3BucketName,
-          s3Key: lambdaS3AssetsZip.s3ObjectKey,
-        },
-        handler: "contactsService.getContacts",
-        runtime: "nodejs12.x",
-        role: dynamoDbReadRole.attrArn,
-        functionName: "ChatAppGetContactsLambda",
-        description: "This function returns all contacts of a ChatApp user.",
-      }
+      "contactsService.getContacts",
+      "This function returns all contacts of a ChatApp user."
     );
   }
 }

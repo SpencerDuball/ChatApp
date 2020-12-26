@@ -1,4 +1,10 @@
-import { DynamoDBClient, GetItemCommand } from "@aws-sdk/client-dynamodb";
+import {
+  DynamoDBClient,
+  GetItemCommand,
+  PutItemCommand,
+  UpdateItemCommand,
+  DeleteItemCommand,
+} from "@aws-sdk/client-dynamodb";
 
 // helpers
 const parseCognitoSub = (amr: string[]) => {
@@ -10,67 +16,143 @@ const parseCognitoSub = (amr: string[]) => {
 
 // contact
 export const getContact = async (event: any) => {
-  console.log(event);
-  console.log(event.requestContext.authorizer);
-  console.log(event.requestContext.authorizer.iam.cognitoIdentity.amr);
-  console.log(
-    parseCognitoSub(event.requestContext.authorizer.iam.cognitoIdentity.amr)
+  const sub = parseCognitoSub(
+    event.requestContext.authorizer.iam.cognitoIdentity.amr
   );
 
-  return {
-    status: 200,
-    body: {
-      id: event.pathParameters.id,
-      given_name: "Spencer",
-      family_name: "Duball",
-      email: "spencerduball@gmail.com",
-      sub: "2093948028340-39480243383-234439829483",
+  const client = new DynamoDBClient({ region: process.env.REGION });
+  const command = new GetItemCommand({
+    TableName: process.env.DDB_TABLE_NAME,
+    Key: {
+      PK: { S: `USER#${sub}` },
+      SK: { S: `CONTACT#${event.pathParameters.id}` },
     },
-  };
+  });
+
+  try {
+    const res = await client.send(command);
+    console.log(res);
+
+    if (res.Item) {
+      return {
+        status: 200,
+        data: {
+          item: {
+            sub: res.Item.SK.S?.split("#").pop(),
+            givenName: res.Item.givenName.S,
+            familyName: res.Item.familyName.S,
+            profilePhotoUrl: res.Item.profilePhotoUrl.S,
+            notes: res.Item.notes.S,
+          },
+        },
+      };
+    } else {
+      return {
+        status: 400,
+        data: {
+          code: "ItemNotFound",
+          message: "No item exists with id: " + event.pathParameters.id,
+        },
+      };
+    }
+  } catch (error) {
+    return {
+      status: 500,
+      data: {
+        code: "Unidentified",
+        message: "The server threw an unidentified error.",
+      },
+    };
+  }
 };
 export const postContact = async (event: any) => {
-  console.log(event);
-
-  return {
-    status: 200,
-    body: {
-      given_name: "Spencer",
-      family_name: "Duball",
-      email: "spencerduball@gmail.com",
-      sub: "2093948028340-39480243383-234439829483",
-      message: "User was successfully created with a POST!",
+  const sub = parseCognitoSub(
+    event.requestContext.authorizer.iam.cognitoIdentity.amr
+  );
+  const client = new DynamoDBClient({ region: process.env.REGION });
+  const command = new PutItemCommand({
+    TableName: process.env.DDB_TABLE_NAME,
+    Expected: { SK: { Exists: false } },
+    Item: {
+      PK: { S: `USER#${sub}` },
+      SK: { S: `CONTACT#${event.body.sub}` },
+      givenName: { S: event.body.givenName },
+      familyName: { S: event.body.familyName },
+      profilePhotoUrl: {
+        S: event.body.profilePhotoUrl ? event.body.profilePhotoUrl : "",
+      },
+      notes: { S: event.body.notes ? event.body.notes : "" },
     },
-  };
+    ReturnValues: "ALL_NEW",
+  });
+
+  try {
+    const res = await client.send(command);
+    return {
+      status: 200,
+      data: {
+        item: {
+          sub: res.Attributes?.SK.S?.split("#").pop(),
+          givenName: res.Attributes?.givenName.S,
+          familyName: res.Attributes?.familyName.S,
+          profilePhotoUrl: res.Attributes?.profilePhotoUrl.S,
+          notes: res.Attributes?.notes.S,
+        },
+      },
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      status: 500,
+      body: {
+        code: "Unidentified",
+        message: "The server threw an unidentified error.",
+      },
+    };
+  }
 };
 export const patchContact = async (event: any) => {
-  console.log(event);
-
-  return {
-    status: 200,
-    body: {
-      id: event.pathParameters.id,
-      given_name: "Spencer",
-      family_name: "Duball",
-      email: "spencerduball@gmail.com",
-      sub: "2093948028340-39480243383-234439829483",
-      message: "User was successfully patched with a PATCH!",
+  const sub = parseCognitoSub(
+    event.requestContext.authorizer.iam.cognitoIdentity.amr
+  );
+  const client = new DynamoDBClient({ region: process.env.REGION });
+  const command = new UpdateItemCommand({
+    TableName: process.env.DDB_TABLE_NAME,
+    ExpressionAttributeNames: {
+      "#GN": "givenName",
+      "#FN": "familyName",
+      "#P": "profilePhotoUrl",
+      "#N": "notes",
     },
-  };
+    ExpressionAttributeValues: {
+      ":gn": event.body.givenName,
+      ":fn": event.body.familyName,
+      ":p": event.body.profilePhotoUrl,
+      ":n": event.body.notes,
+    },
+    Key: {
+      PK: { S: `USER#${sub}` },
+      SK: { S: `CONTACT#${event.body.sub}` },
+    },
+    ReturnValues: "ALL_NEW",
+    UpdateExpression: "SET #GN = :gn, #FN = :fn, #P = :p, #N = :n",
+  });
+
+  try {
+  } catch (error) {}
 };
 export const deleteContact = async (event: any) => {
-  console.log(event);
-
-  return {
-    status: 200,
-    body: {
-      id: event.pathParameters.id,
-      given_name: "Spencer",
-      family_name: "Duball",
-      email: "spencerduball@gmail.com",
-      sub: "2093948028340-39480243383-234439829483",
-      message: "User was successfully deleted with a DELETE!",
+  const sub = parseCognitoSub(
+    event.requestContext.authorizer.iam.cognitoIdentity.amr
+  );
+  const client = new DynamoDBClient({ region: process.env.REGION });
+  const command = new DeleteItemCommand({
+    TableName: process.env.DDB_TABLE_NAME,
+    Key: {
+      PK: { S: `USER#${sub}` },
+      SK: { S: `CONTACT#${event.pathParameters.id}` },
     },
-  };
+  });
 };
 
 // contacts
