@@ -4,40 +4,57 @@ import { getUserSub } from "./lambdaHelpers";
 export const handler = async (event: any) => {
   // get event info
   const userSub = getUserSub(event);
-  const { givenName, familyName, profilePhotoUrl, notes } = event.body;
+  const { givenName, familyName, profilePhotoUrl, notes } = JSON.parse(
+    event.body
+  );
 
-  // create UpdateExpression string
-  const updateStrings = [];
-  if (givenName) updateStrings.push("SET #gn :gn");
-  if (familyName) updateStrings.push("SET #fn :fn");
-  if (profilePhotoUrl) updateStrings.push("SET #ppu :ppu");
-  if (notes) updateStrings.push("SET #n :n");
+  // build command
+  const expressionAttributeNames: { [key: string]: string } = { "#sk": "SK" };
+  const expressionAttributeValues: { [key: string]: any } = {};
+  const updateExpressionTerms = [];
+  if (givenName) {
+    updateExpressionTerms.push("#gn = :gn");
+    expressionAttributeNames["#gn"] = "givenName";
+    expressionAttributeValues[":gn"] = { S: givenName };
+  }
+  if (familyName) {
+    updateExpressionTerms.push("#fn = :fn");
+    expressionAttributeNames["#fn"] = "familyName";
+    expressionAttributeValues[":fn"] = { S: familyName };
+  }
+  if (profilePhotoUrl) {
+    updateExpressionTerms.push("#ppu = :ppu");
+    expressionAttributeNames["#ppu"] = "profilePhotoUrl";
+    expressionAttributeValues[":ppu"] = { S: profilePhotoUrl };
+  }
+  if (notes) {
+    updateExpressionTerms.push("#n = :n");
+    expressionAttributeNames["#n"] = "notes";
+    expressionAttributeValues[":n"] = { S: notes };
+  }
+
+  let updateExpression = "";
+  if (updateExpressionTerms.length > 0) {
+    updateExpression =
+      "SET " +
+      updateExpressionTerms.reduce(
+        (accumulator, newValue) => accumulator + ", " + newValue
+      );
+  }
 
   // ddb
   const client = new DynamoDBClient({ region: process.env.REGION });
   const command = new UpdateItemCommand({
     TableName: process.env.DDB_TABLE_NAME,
-    Expected: { SK: { Exists: true } },
     ReturnValues: "ALL_NEW",
     Key: {
       PK: { S: `USER#${userSub}` },
       SK: { S: `CONTACT#${event.pathParameters.id}` },
     },
-    UpdateExpression: updateStrings.reduce(
-      (accumulator, newValue) => accumulator + ", " + newValue
-    ),
-    ExpressionAttributeNames: {
-      "#gn": "givenName",
-      "#fn": "familyName",
-      "#ppu": "profilePhotoUrl",
-      "#n": "notes",
-    },
-    ExpressionAttributeValues: {
-      ":gn": { S: givenName },
-      ":fn": { S: familyName },
-      ":ppu": { S: profilePhotoUrl },
-      ":n": { S: notes },
-    },
+    ConditionExpression: "attribute_exists(#sk)",
+    UpdateExpression: updateExpression,
+    ExpressionAttributeNames: expressionAttributeNames,
+    ExpressionAttributeValues: expressionAttributeValues,
   });
 
   try {
@@ -47,10 +64,12 @@ export const handler = async (event: any) => {
       status: 200,
       data: {
         item: {
-          givenName: res.Attributes?.sub.S,
-          familyName: res.Attributes?.sub.S,
-          profilePhotoUrl: res.Attributes?.sub.S,
-          notes: res.Attributes?.sub.S,
+          PK: res.Attributes?.PK.S,
+          SK: res.Attributes?.SK.S,
+          givenName: res.Attributes?.givenName.S,
+          familyName: res.Attributes?.familyName.S,
+          profilePhotoUrl: res.Attributes?.profilePhotoUrl.S,
+          notes: res.Attributes?.notes.S,
         },
       },
     };

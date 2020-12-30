@@ -102,5 +102,5 @@ const getContacts = async (sub: string) => {
 };
 
 (async () => {
-  console.log(await getContacts("d1653350-03bd-4cb9-b256-afe4f250d4d2"));
+  // console.log(await getContacts("d1653350-03bd-4cb9-b256-afe4f250d4d2"));
 })();

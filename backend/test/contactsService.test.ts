@@ -2,7 +2,6 @@ import * as dotenv from "dotenv";
 import axios, { AxiosInstance } from "axios";
 import { getTempCredentials } from "../util/getTempCredentials";
 import { aws4Interceptor } from "aws4-axios";
-import { Api } from "@aws-sdk/client-apigatewayv2";
 
 // configure environment variables
 dotenv.config();
@@ -35,6 +34,22 @@ const getContactsTest = async (API: AxiosInstance) => {
   return getContactsRes;
 };
 
+const updateContactTest1 = async (API: AxiosInstance) => {
+  const updateContactRes = await API.patch("/test/contact/test_user_sub", {
+    givenName: "Leroy",
+    notes: "Hello there this is notes.",
+  });
+  return updateContactRes;
+};
+
+const updateContactTest2 = async (API: AxiosInstance) => {
+  const updateContactRes = await API.patch("/test/contact/test_user_sub", {
+    familyName: "Jenkinsaaaahhhh",
+    notes: "This update has finished",
+  });
+  return updateContactRes;
+};
+
 (async () => {
   // get credentials
   const { Credentials } = await getTempCredentials({
@@ -63,8 +78,10 @@ const getContactsTest = async (API: AxiosInstance) => {
   );
 
   try {
-    console.log((await createContactTest(API)).data);
+    // console.log((await createContactTest(API)).data);
     // console.log((await getContactTest(API)).data);
+    // console.log((await updateContactTest1(API)).data);
+    // console.log((await updateContactTest2(API)).data);
     // console.log((await deleteContactTest(API)).data);
     // console.log((await getContactsTest(API)).data);
   } catch (error) {

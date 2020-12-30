@@ -9,7 +9,7 @@ export const handler = async (event: any) => {
   const client = new DynamoDBClient({ region: process.env.REGION });
   const command = new PutItemCommand({
     TableName: process.env.DDB_TABLE_NAME,
-    ConditionExpression: "attribute_not_exists(#pk)",
+    ConditionExpression: "attribute_not_exists(#sk)",
     Item: {
       PK: { S: `USER#${userSub}` },
       SK: { S: `CONTACT#${sub}` },
@@ -19,7 +19,7 @@ export const handler = async (event: any) => {
       notes: { S: notes ? notes : "" },
     },
     ExpressionAttributeNames: {
-      "#pk": "PK",
+      "#sk": "SK",
     },
   });
 
