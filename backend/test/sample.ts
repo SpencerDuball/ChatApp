@@ -3,6 +3,7 @@ import {
   GetItemCommand,
   PutItemCommand,
   DeleteItemCommand,
+  QueryCommand,
 } from "@aws-sdk/client-dynamodb";
 
 const userSub = "d1653350-03bd-4cb9-b256-afe4f250d4d2";
@@ -38,6 +39,7 @@ const postContact = async (props: {
   const client = new DynamoDBClient({ region: REGION });
   const command = new PutItemCommand({
     TableName: DDB_TABLE_NAME,
+    Expected: { SK: { Exists: true } },
     Item: {
       PK: { S: `USER#${userSub}` },
       SK: { S: `CONTACT#${props.contactSub}` },
@@ -76,14 +78,29 @@ const deleteContact = async (contactSub: string) => {
   }
 };
 
+const getContacts = async (sub: string) => {
+  const client = new DynamoDBClient({ region: REGION });
+  const command = new QueryCommand({
+    TableName: DDB_TABLE_NAME,
+    KeyConditionExpression: "#pk = :pk AND begins_with(#sk, :sk)",
+    ExpressionAttributeNames: {
+      "#pk": "PK",
+      "#sk": "SK",
+    },
+    ExpressionAttributeValues: {
+      ":pk": { S: `USER#${sub}` },
+      ":sk": { S: `CONTACT#` },
+    },
+  });
+
+  try {
+    const res = await client.send(command);
+    return res;
+  } catch (error) {
+    return error;
+  }
+};
+
 (async () => {
-  console.log(
-    await postContact({
-      contactSub: "d1653350-03bd-4cb9-b256-afe4f250d4a1",
-      givenName: "Luke",
-      familyName: "Duball",
-      profilePhotoUrl:
-        "https://media-exp1.licdn.com/dms/image/C4D03AQHB4jlEPTjqNw/profile-displayphoto-shrink_200_200/0/1572031979719?e=1614211200&v=beta&t=4iw19D1asw0ex-bReBNK-xY631kNyFReCoQZciseU_k",
-    })
-  );
+  console.log(await getContacts("d1653350-03bd-4cb9-b256-afe4f250d4d2"));
 })();

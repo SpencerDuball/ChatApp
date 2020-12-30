@@ -157,7 +157,8 @@ export class ComputePlane extends cdk.Stack {
     const computePlaneLambda = (
       name: string,
       handler: string,
-      description: string
+      description: string,
+      role: iam.CfnRole
     ) => {
       return new lambda.CfnFunction(this, name, {
         code: {
@@ -173,7 +174,7 @@ export class ComputePlane extends cdk.Stack {
         layers: [computeServiceLambdaLayer.ref],
         handler,
         runtime: "nodejs12.x",
-        role: dynamoDbReadRole.attrArn,
+        role: role.attrArn,
         functionName: name,
         description,
       });
@@ -182,29 +183,33 @@ export class ComputePlane extends cdk.Stack {
     // contactService
     this.lambda.getContact = computePlaneLambda(
       "ChatAppGetContactLambda",
-      "contactsService.getContact",
-      "This function returns a ChatApp contact by ID."
+      "getContact.handler",
+      "This function returns a ChatApp contact by ID.",
+      dynamoDbReadRole
     );
     this.lambda.postContact = computePlaneLambda(
       "ChatAppPostContactLambda",
-      "contactsService.postContact",
-      "This function creates a ChatApp contact."
+      "createContact.handler",
+      "This function creates a ChatApp contact.",
+      dynamoDbWriteRole
     );
     this.lambda.patchContact = computePlaneLambda(
       "ChatAppPatchContactLambda",
-      "contactsService.patchContact",
-      "This function patches a ChatApp contact by ID."
+      "updateContact.handler",
+      "This function patches a ChatApp contact by ID.",
+      dynamoDbWriteRole
     );
     this.lambda.deleteContact = computePlaneLambda(
       "ChatAppDeleteContactLambda",
-      "contactsService.deleteContact",
-      "This function deletes a ChatApp contact by ID."
+      "deleteContact.handler",
+      "This function deletes a ChatApp contact by ID.",
+      dynamoDbWriteRole
     );
-
     this.lambda.getContacts = computePlaneLambda(
       "ChatAppGetContactsLambda",
-      "contactsService.getContacts",
-      "This function returns all contacts of a ChatApp user."
+      "getContacts.handler",
+      "This function returns all contacts of a ChatApp user.",
+      dynamoDbReadRole
     );
   }
 }
