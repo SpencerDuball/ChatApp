@@ -1,9 +1,11 @@
-import { useRef, useState, useLayoutEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Box, BoxProps, VStack, IconButton, Icon } from "@chakra-ui/react";
 import { IoChatbubble, IoPeople } from "react-icons/io5";
 import { ContactItem } from "@frontend/components/li/ContactItem";
 import { Header } from "@frontend/components/screen/drawer/Header";
 import { Footer } from "@frontend/components/screen/drawer/Footer";
+import { useQuery } from "react-query";
+import axios from "axios";
 
 export interface DrawerProps extends BoxProps {}
 
@@ -20,7 +22,7 @@ export const Drawer = (props: DrawerProps) => {
   const [currentDrawer, setCurrentDrawer] = useState("chats");
 
   // TODO: extract to hook
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (headerRef && headerRef.current && footerRef && footerRef.current) {
       setHeightOf({
         header: `${headerRef.current.clientHeight}px`,
