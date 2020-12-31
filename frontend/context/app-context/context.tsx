@@ -2,7 +2,8 @@ import React, { useEffect, useReducer } from "react";
 import reducer from "./reducer";
 import { IAppContextState, IAppContextReducerAction } from "./types";
 import { CognitoUser } from "amazon-cognito-identity-js";
-import { Auth } from "aws-amplify";
+import { Auth, Hub } from "aws-amplify";
+import axios, { AxiosInstance } from "axios";
 
 // create context value
 const initialState: IAppContextState = {
