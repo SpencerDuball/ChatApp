@@ -2,8 +2,7 @@ import React, { useEffect, useReducer } from "react";
 import reducer from "./reducer";
 import { IAppContextState, IAppContextReducerAction } from "./types";
 import { CognitoUser } from "amazon-cognito-identity-js";
-import { Auth, Hub } from "aws-amplify";
-import axios, { AxiosInstance } from "axios";
+import { Auth } from "aws-amplify";
 
 // create context value
 const initialState: IAppContextState = {
@@ -74,6 +73,13 @@ const useLocalStorageLogin = (
 //////////////////////////////////////////////////////////////////////////////
 export const AppContextProvider = (props: { children: React.ReactNode }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
+
+  useEffect(() => {
+    (async () => {
+      const session = await Auth.currentSession();
+      console.log(session);
+    })();
+  });
 
   // check for user in local storage
   useLocalStorageLogin(dispatch);
