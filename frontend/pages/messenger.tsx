@@ -28,7 +28,6 @@ const Messenger = () => {
         gridColumn={{ base: "1 / span 1", md: "1 / span 1" }}
       />
       <Box
-        bgColor="red.200"
         gridRow="1 / span 1"
         gridColumn={{ base: "1 / span 1", md: "2 / span 1" }}
       />

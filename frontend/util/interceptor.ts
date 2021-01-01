@@ -1,4 +1,5 @@
 import { sign } from "aws4";
+import { Signer } from "@aws-amplify/core";
 import { AxiosRequestConfig } from "axios";
 import combineURLs from "axios/lib/helpers/combineURLs";
 import isAbsoluteURL from "axios/lib/helpers/isAbsoluteURL";
@@ -90,6 +91,7 @@ export const aws4Interceptor = (
   sign(signingOptions, transformCredentials(credentials));
 
   config.headers = signingOptions.headers;
+  delete config.headers["Host"];
 
   return config;
 };
@@ -113,8 +115,13 @@ const getTransformer = (config: AxiosRequestConfig) => {
 const transformCredentials = (credentials: Credentials) => {
   const newCredentials = {};
   Object.entries(credentials).forEach(([key, value]) => {
-    if (typeof value === "string") newCredentials[key] = value;
-    else newCredentials[key] = value();
+    if (typeof value === "string") {
+      newCredentials[key] = value;
+      console.log(value);
+    } else {
+      newCredentials[key] = value();
+      console.log(value());
+    }
   });
   return newCredentials;
 };

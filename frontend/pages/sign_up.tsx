@@ -2,7 +2,6 @@ import { useState, BaseSyntheticEvent } from "react";
 import { GetServerSidePropsContext } from "next";
 import Head from "next/head";
 import NextLink from "next/link";
-import router from "next/router";
 import {
   Box,
   Center,

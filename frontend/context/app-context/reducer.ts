@@ -1,20 +1,24 @@
 import { IAppContextState, IAppContextReducerAction } from "./types";
-import { Auth } from "aws-amplify";
-
-const idTokenKey = (sub: string) =>
-  `CognitoIdentityServiceProvider.${process.env.NEXT_PUBLIC_COGNITO_APP_CLIENT_ID}.${sub}.idToken`;
+import axios from "axios";
 
 const reducer = (
   state: IAppContextState,
   action: IAppContextReducerAction
 ): IAppContextState => {
   switch (action.type) {
-    case "SET_IS_LOGGED_IN": {
+    case "SET_IS_LOGGED_IN":
       return {
         ...state,
         isLoggedIn: action.payload.isLoggedIn,
       };
-    }
+
+    case "SET_API_AND_CREDENTIALS":
+      const { API, credentials } = action.payload;
+      return {
+        ...state,
+        API,
+        credentials,
+      };
 
     default: {
       throw new Error(`The action type: ${action.type} does not exist.`);

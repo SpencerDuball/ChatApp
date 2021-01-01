@@ -1,9 +1,10 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useContext } from "react";
 import { Box, BoxProps, VStack, IconButton, Icon } from "@chakra-ui/react";
 import { IoChatbubble, IoPeople } from "react-icons/io5";
 import { ContactItem } from "@frontend/components/li/ContactItem";
 import { Header } from "@frontend/components/screen/drawer/Header";
 import { Footer } from "@frontend/components/screen/drawer/Footer";
+import { AppContext } from "@frontend/context/app-context/context";
 import { useQuery } from "react-query";
 import axios from "axios";
 
@@ -30,6 +31,20 @@ export const Drawer = (props: DrawerProps) => {
       });
     }
   }, []);
+
+  // fetch contacts
+  const [state] = useContext(AppContext);
+  const contacts = useQuery("contacts", async () => {
+    console.log(state.API);
+    const data = await state.API.get("/test/contacts");
+    return data.data;
+  });
+  if (contacts.isLoading) {
+    console.log("Loading ...");
+  }
+  if (contacts.data) {
+    console.log(contacts.data);
+  }
 
   return (
     <Box bgColor="brand.gray.50" position="relative" {...props}>
