@@ -1,13 +1,15 @@
 import { GetServerSidePropsContext } from "next";
 import { Amplify, withSSRContext } from "aws-amplify";
 import awsConfig from "../aws-config";
-import { Box, Grid } from "@chakra-ui/react";
+import { Box, Grid, useToken } from "@chakra-ui/react";
 import { Drawer } from "@frontend/components/screen/drawer/Drawer";
 
 // Must do this for every page until issue is resolved: https://github.com/vercel/next.js/issues/16977
 Amplify.configure({ ...awsConfig, ssr: true });
 
 const Messenger = () => {
+  const [brandGray200] = useToken("colors", ["brand.gray.200"]);
+
   return (
     <Grid
       as="main"
@@ -25,6 +27,7 @@ const Messenger = () => {
       <Drawer
         h="100%"
         gridRow="1 / span 1"
+        borderRight={{ base: "none", md: `1px solid ${brandGray200}` }}
         gridColumn={{ base: "1 / span 1", md: "1 / span 1" }}
       />
       <Box
@@ -40,7 +43,12 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
   // redirect user to '/sign_in' if not authenticated
   try {
-    const user = await SSR.Auth.currentAuthenticatedUser();
+    // check if signed in
+    await SSR.Auth.currentAuthenticatedUser().catch((e) =>
+      // currentAuthenticatedUser() might throw if the accessId has expired
+      // call currentSession() to get new tokens if refreshToken is still valid
+      SSR.Auth.currentSession()
+    );
     return { props: {} };
   } catch (error) {
     return { redirect: { destination: "/sign_in", permanent: false } };

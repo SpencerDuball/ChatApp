@@ -12,11 +12,10 @@ const reducer = (
         isLoggedIn: action.payload.isLoggedIn,
       };
 
-    case "SET_API_AND_CREDENTIALS":
-      const { API, credentials } = action.payload;
+    case "SET_CREDENTIALS":
+      const { credentials } = action.payload;
       return {
         ...state,
-        API,
         credentials,
       };
 

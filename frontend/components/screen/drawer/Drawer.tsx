@@ -1,12 +1,18 @@
-import { useRef, useState, useEffect, useContext } from "react";
-import { Box, BoxProps, VStack, IconButton, Icon } from "@chakra-ui/react";
+import { useRef, useState, useEffect } from "react";
+import {
+  Box,
+  BoxProps,
+  VStack,
+  IconButton,
+  Icon,
+  Skeleton,
+} from "@chakra-ui/react";
 import { IoChatbubble, IoPeople } from "react-icons/io5";
 import { ContactItem } from "@frontend/components/li/ContactItem";
 import { Header } from "@frontend/components/screen/drawer/Header";
 import { Footer } from "@frontend/components/screen/drawer/Footer";
-import { AppContext } from "@frontend/context/app-context/context";
 import { useQuery } from "react-query";
-import axios from "axios";
+import { API } from "@frontend/context/app-context/API";
 
 export interface DrawerProps extends BoxProps {}
 
@@ -15,14 +21,6 @@ export const Drawer = (props: DrawerProps) => {
   const headerRef = useRef(null);
   const footerRef = useRef(null);
   const [heightOf, setHeightOf] = useState({ header: "0px", footer: "0px" });
-
-  // header controlled input
-  const [headerValue, setHeaderValue] = useState("");
-
-  // drawer control
-  const [currentDrawer, setCurrentDrawer] = useState("chats");
-
-  // TODO: extract to hook
   useEffect(() => {
     if (headerRef && headerRef.current && footerRef && footerRef.current) {
       setHeightOf({
@@ -32,19 +30,15 @@ export const Drawer = (props: DrawerProps) => {
     }
   }, []);
 
-  // fetch contacts
-  const [state] = useContext(AppContext);
+  // drawer UI control
+  const [headerValue, setHeaderValue] = useState("");
+  const [currentDrawer, setCurrentDrawer] = useState("chats");
+
+  // API data
   const contacts = useQuery("contacts", async () => {
-    console.log(state.API);
-    const data = await state.API.get("/test/contacts");
+    const data = await API.get("/test/contacts");
     return data.data;
   });
-  if (contacts.isLoading) {
-    console.log("Loading ...");
-  }
-  if (contacts.data) {
-    console.log(contacts.data);
-  }
 
   return (
     <Box bgColor="brand.gray.50" position="relative" {...props}>
@@ -53,36 +47,50 @@ export const Drawer = (props: DrawerProps) => {
         position="absolute"
         top="0"
         left="0"
-        title="Contacts"
+        title={currentDrawer === "chats" ? "Chats" : "Contacts"}
         value={headerValue}
         handleChange={(e) => setHeaderValue(e.target.value)}
       />
       {/* Content */}
       <Box h="full" w="full" overflow="auto">
         <VStack pt={heightOf.header} pb={heightOf.footer} spacing={1} px={3}>
-          <ContactItem sub="809dfs20" givenName="Spencer" familyName="Duball" />
-          <ContactItem sub="80dfs20" givenName="Luke" familyName="Duball" />
-          <ContactItem sub="89dfs20" givenName="Jerry" familyName="Duball" />
-          <ContactItem sub="809fs20" givenName="Russ" familyName="Hannamen" />
-          <ContactItem sub="809ds20" givenName="Keri" familyName="Washington" />
-          <ContactItem sub="809df20" givenName="Robert" familyName="Duvall" />
-          <ContactItem sub="809dfs0" givenName="Russell" familyName="Stewart" />
-          <ContactItem
-            sub="82"
-            isSelected
-            givenName="Tyfus"
-            familyName="Kerfa"
-          />
-          <ContactItem sub="809d" givenName="Alski" familyName="Stenba" />
-          <ContactItem sub="39022094" givenName="Brad" familyName="Pitt" />
-          <ContactItem sub="3902193" givenName="Hillary" familyName="Clinton" />
-          <ContactItem sub="kdjlfsp" givenName="Donald" familyName="Trump" />
-          <ContactItem sub="1093fkl" givenName="Carrot" familyName="Stick" />
-          <ContactItem sub="dlksf" givenName="Morgan" familyName="Freeman" />
-          <ContactItem sub="djfs00-" givenName="Flem" familyName="Bot" />
-          <ContactItem sub="1jofij" givenName="Tracy" familyName="Morgan" />
-          <ContactItem sub="4kjfs" givenName="Kagney" familyName="White" />
-          <ContactItem sub="490fj" givenName="Riley" familyName="Racker" />
+          {contacts.data ? (
+            contacts.data.body.map((contact) => (
+              <ContactItem
+                key={contact.SK}
+                sub={contact.SK}
+                givenName={contact.givenName}
+                familyName={contact.familyName}
+              />
+            ))
+          ) : (
+            <>
+              <Skeleton width="100%" endColor="brand.gray.100">
+                <ContactItem
+                  key="skeleton-1"
+                  sub="skeleton-1"
+                  givenName=""
+                  familyName=""
+                />
+              </Skeleton>
+              <Skeleton width="100%" endColor="brand.gray.100">
+                <ContactItem
+                  key="skeleton-2"
+                  sub="skeleton-2"
+                  givenName=""
+                  familyName=""
+                />
+              </Skeleton>
+              <Skeleton width="100%" endColor="brand.gray.100">
+                <ContactItem
+                  key="skeleton-3"
+                  sub="skeleton-3"
+                  givenName=""
+                  familyName=""
+                />
+              </Skeleton>
+            </>
+          )}
         </VStack>
       </Box>
       <Footer ref={footerRef} position="absolute" bottom="0" left="0">

@@ -6,11 +6,11 @@ import { Auth } from "@aws-amplify/auth";
 import axios, { AxiosInstance } from "axios";
 import { ICredentials } from "@aws-amplify/core";
 import { aws4Interceptor } from "@frontend/util/interceptor";
+import { API } from "./API";
 
 // create context value
 const initialState: IAppContextState = {
   isLoggedIn: false,
-  API: null,
   credentials: null,
 };
 
@@ -43,12 +43,11 @@ export const signIn = async (
   return signInResult;
 };
 
-export const setApiAndCredentials = async (
+export const setCredentials = async (
   dispatch: React.Dispatch<IAppContextReducerAction>,
-  API: AxiosInstance,
   credentials: ICredentials
 ) => {
-  dispatch({ type: "SET_API_AND_CREDENTIALS", payload: { API, credentials } });
+  dispatch({ type: "SET_CREDENTIALS", payload: { credentials } });
 };
 
 export const signUp = async (input: {
@@ -81,7 +80,7 @@ const useLocalStorageLogin = (
   }, []);
 };
 
-const useSetApiAndCredentials = (
+const useSetCredentials = (
   state: IAppContextState,
   dispatch: React.Dispatch<IAppContextReducerAction>
 ) => {
@@ -91,18 +90,15 @@ const useSetApiAndCredentials = (
       const credentials = await Auth.currentCredentials();
 
       // create new API
-      const API = axios.create({
-        baseURL: process.env.NEXT_PUBLIC_API_ENDPOINT,
-      });
       const { accessKeyId, secretAccessKey, sessionToken } = credentials;
       API.interceptors.request.use(
         aws4Interceptor({}, { accessKeyId, secretAccessKey, sessionToken })
       );
 
       // dispatch new API & credentials
-      setApiAndCredentials(dispatch, API, credentials);
+      setCredentials(dispatch, credentials);
     } else {
-      setApiAndCredentials(dispatch, null, null);
+      setCredentials(dispatch, null);
     }
   };
 
@@ -132,7 +128,7 @@ export const AppContextProvider = (props: { children: React.ReactNode }) => {
   useLocalStorageLogin(dispatch);
 
   // set API and Credentials
-  useSetApiAndCredentials(state, dispatch);
+  useSetCredentials(state, dispatch);
 
   return (
     <AppContext.Provider value={[state, dispatch]} children={props.children} />

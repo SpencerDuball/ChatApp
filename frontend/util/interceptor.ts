@@ -117,10 +117,8 @@ const transformCredentials = (credentials: Credentials) => {
   Object.entries(credentials).forEach(([key, value]) => {
     if (typeof value === "string") {
       newCredentials[key] = value;
-      console.log(value);
     } else {
       newCredentials[key] = value();
-      console.log(value());
     }
   });
   return newCredentials;

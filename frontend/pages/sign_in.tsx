@@ -226,7 +226,12 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
   // redirect user to '/messenger' if signed in
   try {
-    const user = await SSR.Auth.currentAuthenticatedUser();
+    // check if signed in
+    await SSR.Auth.currentAuthenticatedUser().catch((e) =>
+      // currentAuthenticatedUser() might throw if the accessId has expired
+      // call currentSession() to get new tokens if refreshToken is still valid
+      SSR.Auth.currentSession()
+    );
     return { redirect: { destination: "/messenger", permanent: false } };
   } catch (error) {
     return { props: {} };
