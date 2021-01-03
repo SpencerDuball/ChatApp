@@ -1,28 +1,16 @@
-import {
-  useRef,
-  useState,
-  useEffect,
-  useContext,
-  Dispatch,
-  SetStateAction,
-} from "react";
+import { useRef, useState, useEffect, useContext } from "react";
 import { Box, BoxProps, VStack, IconButton, Icon } from "@chakra-ui/react";
 import { IoChatbubble, IoPeople } from "react-icons/io5";
 import { ContactItem } from "components/li/ContactItem";
 import { ContactItemSkeleton } from "components/li/ContactItemSkeleton";
 import { Header } from "components/screen/drawer/components/Header";
 import { Footer } from "components/screen/drawer/components/Footer";
-import { useQuery } from "react-query";
-import { API } from "api/API";
-import { AppContext } from "context/app-context/context";
-import { ContactI } from "api/types";
+import {
+  MessengerContext,
+  setSelectedContact,
+} from "context/messenger-context/context";
 
-export interface DrawerProps extends BoxProps {
-  contactInfo: {
-    selectedContact: ContactI;
-    setSelectedContact: Dispatch<SetStateAction<ContactI>>;
-  };
-}
+export interface DrawerProps extends BoxProps {}
 
 export const Drawer = (props: DrawerProps) => {
   // use refs to collect header & footer height values
@@ -43,15 +31,7 @@ export const Drawer = (props: DrawerProps) => {
   const [currentDrawer, setCurrentDrawer] = useState("chats");
 
   // API data
-  const [state] = useContext(AppContext);
-  const contacts = useQuery(
-    "contacts",
-    async () => {
-      const res = await API.get("/test/contacts");
-      return res.data;
-    },
-    { enabled: !!state.credentials }
-  );
+  const [state, dispatch] = useContext(MessengerContext);
 
   return (
     <Box bgColor="brand.gray.50" position="relative" {...props}>
@@ -67,8 +47,8 @@ export const Drawer = (props: DrawerProps) => {
       {/* Content */}
       <Box h="full" w="full" overflow="auto">
         <VStack pt={heightOf.header} pb={heightOf.footer} spacing={1} px={3}>
-          {contacts.data
-            ? contacts.data.body.map((contact) => (
+          {state.contacts
+            ? state.contacts.map((contact) => (
                 <ContactItem
                   key={contact.id}
                   givenName={contact.givenName}
@@ -76,6 +56,8 @@ export const Drawer = (props: DrawerProps) => {
                   profilePhotoUrl={
                     contact.profilePhotoUrl ? contact.profilePhotoUrl : null
                   }
+                  isSelected={state.selectedContact.id === contact.id}
+                  onClick={() => setSelectedContact(dispatch, contact)}
                 />
               ))
             : Array.from({ length: 5 }).map((_, key) => (

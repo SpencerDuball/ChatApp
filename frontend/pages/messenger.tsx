@@ -1,17 +1,15 @@
-import { useState } from "react";
 import { GetServerSidePropsContext } from "next";
 import { Amplify, withSSRContext } from "aws-amplify";
 import awsConfig from "../aws-config";
 import { Box, Grid, useToken } from "@chakra-ui/react";
 import { Drawer } from "components/screen/drawer/Drawer";
-import { ContactI } from "api/types";
+import { MessengerContextProvider } from "context/messenger-context/context";
 
 // Must do this for every page until issue is resolved: https://github.com/vercel/next.js/issues/16977
 Amplify.configure({ ...awsConfig, ssr: true });
 
 const Messenger = () => {
   const [brandGray200] = useToken("colors", ["brand.gray.200"]);
-  const [selectedContact, setSelectedContact] = useState<ContactI | null>(null);
 
   return (
     <Grid
@@ -27,17 +25,18 @@ const Messenger = () => {
       }}
       gridTemplateRows="100%"
     >
-      <Drawer
-        h="100%"
-        gridRow="1 / span 1"
-        borderRight={{ base: "none", md: `1px solid ${brandGray200}` }}
-        gridColumn={{ base: "1 / span 1", md: "1 / span 1" }}
-        contactInfo={{ selectedContact, setSelectedContact }}
-      />
-      <Box
-        gridRow="1 / span 1"
-        gridColumn={{ base: "1 / span 1", md: "2 / span 1" }}
-      />
+      <MessengerContextProvider>
+        <Drawer
+          h="100%"
+          gridRow="1 / span 1"
+          borderRight={{ base: "none", md: `1px solid ${brandGray200}` }}
+          gridColumn={{ base: "1 / span 1", md: "1 / span 1" }}
+        />
+        <Box
+          gridRow="1 / span 1"
+          gridColumn={{ base: "1 / span 1", md: "2 / span 1" }}
+        />
+      </MessengerContextProvider>
     </Grid>
   );
 };
