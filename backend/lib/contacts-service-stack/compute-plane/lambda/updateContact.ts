@@ -1,5 +1,5 @@
 import { DynamoDBClient, UpdateItemCommand } from "@aws-sdk/client-dynamodb";
-import { getUserSub } from "./lambdaHelpers";
+import { getUserSub, getIdFromSk } from "./lambdaHelpers";
 
 export const handler = async (event: any) => {
   // get event info
@@ -64,8 +64,7 @@ export const handler = async (event: any) => {
       status: 200,
       data: {
         item: {
-          PK: res.Attributes?.PK.S,
-          SK: res.Attributes?.SK.S,
+          id: res.Attributes?.SK.S?.split("#").pop(),
           givenName: res.Attributes?.givenName.S,
           familyName: res.Attributes?.familyName.S,
           profilePhotoUrl: res.Attributes?.profilePhotoUrl.S,

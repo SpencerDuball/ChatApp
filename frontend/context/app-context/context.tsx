@@ -3,10 +3,9 @@ import reducer from "./reducer";
 import { IAppContextState, IAppContextReducerAction } from "./types";
 import { CognitoUser } from "amazon-cognito-identity-js";
 import { Auth } from "@aws-amplify/auth";
-import axios, { AxiosInstance } from "axios";
 import { ICredentials } from "@aws-amplify/core";
-import { aws4Interceptor } from "@frontend/util/interceptor";
-import { API } from "./API";
+import { aws4Interceptor } from "util/interceptor";
+import { API } from "../../api/API";
 
 // create context value
 const initialState: IAppContextState = {
@@ -85,18 +84,20 @@ const useSetCredentials = (
   dispatch: React.Dispatch<IAppContextReducerAction>
 ) => {
   const { isLoggedIn, credentials } = state;
-  const setNewCredentials = async (isLoggedIn: boolean) => {
+  const setNewCredentials = (isLoggedIn: boolean) => {
     if (isLoggedIn) {
-      const credentials = await Auth.currentCredentials();
+      (async () => {
+        const credentials = await Auth.currentCredentials();
 
-      // create new API
-      const { accessKeyId, secretAccessKey, sessionToken } = credentials;
-      API.interceptors.request.use(
-        aws4Interceptor({}, { accessKeyId, secretAccessKey, sessionToken })
-      );
+        // create new API
+        const { accessKeyId, secretAccessKey, sessionToken } = credentials;
+        API.interceptors.request.use(
+          aws4Interceptor({}, { accessKeyId, secretAccessKey, sessionToken })
+        );
 
-      // dispatch new API & credentials
-      setCredentials(dispatch, credentials);
+        // dispatch new API & credentials
+        setCredentials(dispatch, credentials);
+      })();
     } else {
       setCredentials(dispatch, null);
     }
@@ -107,14 +108,20 @@ const useSetCredentials = (
   }, [isLoggedIn]);
 
   useEffect(() => {
-    const run = async () => {
-      if (credentials) {
-        const timeoutMs =
-          new Date(credentials["expiration"]).valueOf() - Date.now();
-        setTimeout(async () => await setNewCredentials(isLoggedIn), timeoutMs);
-      }
-    };
-    run();
+    if (credentials) {
+      // get new credentials when session expires
+      const timeoutMs =
+        new Date(credentials["expiration"]).valueOf() - Date.now();
+      const timeout = setTimeout(
+        async () => setNewCredentials(isLoggedIn),
+        timeoutMs
+      );
+
+      // clear timeout on dismount
+      return () => {
+        clearTimeout(timeout);
+      };
+    }
   }, [credentials]);
 };
 

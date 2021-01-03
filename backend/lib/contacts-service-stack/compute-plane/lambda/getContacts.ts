@@ -24,8 +24,7 @@ export const handler = async (event: any) => {
       status: 200,
       body: res.Items
         ? res.Items.map((value) => ({
-            PK: value.PK?.S,
-            SK: value.SK?.S,
+            id: value.SK?.S?.split("#").pop(),
             familyName: value.familyName?.S,
             givenName: value.givenName?.S,
             profilePhotoUrl: value.profilePhotoUrl?.S,

@@ -18,11 +18,6 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "baseUrl": ".",
-    "paths": {
-      "@frontend/util/*": ["util/*"],
-      "@frontend/components/*": ["components/*"],
-      "@frontend/context/*": ["context/*"]
-    }
   },
   "include": [
     "next-env.d.ts",

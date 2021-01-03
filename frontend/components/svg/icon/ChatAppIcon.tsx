@@ -1,5 +1,5 @@
 import { Icon, IconProps, useToken } from "@chakra-ui/react";
-import filterProps from "@frontend/util/filterProps";
+import filterProps from "util/filterProps";
 
 export interface ChatAppIconProps extends IconProps {
   primaryColor: string; // TODO: need to update interface from "string" to colors

@@ -1,5 +1,5 @@
 import { Center, CenterProps } from "@chakra-ui/react";
-import filterProps from "@frontend/util/filterProps";
+import filterProps from "util/filterProps";
 
 export interface IconButtonProps extends CenterProps {
   icon: React.ReactElement;

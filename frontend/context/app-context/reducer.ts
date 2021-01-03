@@ -1,5 +1,4 @@
 import { IAppContextState, IAppContextReducerAction } from "./types";
-import axios from "axios";
 
 const reducer = (
   state: IAppContextState,

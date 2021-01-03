@@ -12,11 +12,11 @@ import {
   useToken,
 } from "@chakra-ui/react";
 import { ChangeEvent, forwardRef } from "react";
-import { ChatAppIcon } from "@frontend/components/svg/icon/ChatAppIcon";
-import { IconButton } from "@frontend/components/button/IconButton";
+import { ChatAppIcon } from "components/svg/icon/ChatAppIcon";
+import { IconButton } from "components/button/IconButton";
 import { IoPersonAdd, IoSearch } from "react-icons/io5";
-import filterProps from "@frontend/util/filterProps";
-import hexToRGB from "@frontend/util/hexToRGB";
+import filterProps from "util/filterProps";
+import hexToRGB from "util/hexToRGB";
 
 export interface HeaderProps extends StackProps {
   profilePhotoUrl?: string;

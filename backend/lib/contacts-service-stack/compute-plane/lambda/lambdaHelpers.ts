@@ -8,3 +8,5 @@ export const getUserSub = (event: any) => {
   const { amr } = event.requestContext.authorizer.iam.cognitoIdentity;
   return parseCognitoSub(amr);
 };
+
+export const getIdFromSk = (SK: string) => SK.substring(8);

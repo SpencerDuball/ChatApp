@@ -20,12 +20,12 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { IoKey, IoAtCircle } from "react-icons/io5";
-import { HeroBackground } from "@frontend/components/svg/background/HeroBackground";
-import { ChatAppIcon } from "@frontend/components/svg/icon/ChatAppIcon";
+import { HeroBackground } from "components/svg/background/HeroBackground";
+import { ChatAppIcon } from "components/svg/icon/ChatAppIcon";
 import { useForm } from "react-hook-form";
-import { ConfirmUserModal } from "@frontend/components/overlay/ConfirmUserModal";
-import { signIn } from "@frontend/context/app-context/context";
-import { AppContext } from "@frontend/context/app-context/context";
+import { ConfirmUserModal } from "components/overlay/ConfirmUserModal";
+import { signIn } from "context/app-context/context";
+import { AppContext } from "context/app-context/context";
 
 // Must do this for every page until issue is resolved: https://github.com/vercel/next.js/issues/16977
 Amplify.configure({ ...awsConfig, ssr: true });

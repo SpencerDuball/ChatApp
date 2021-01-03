@@ -21,7 +21,7 @@ export const handler = async (event: any) => {
         status: 200,
         data: {
           item: {
-            sub: res.Item.SK.S?.split("#").pop(),
+            id: res.Item.SK.S?.split("#").pop(),
             givenName: res.Item.givenName.S,
             familyName: res.Item.familyName.S,
             profilePhotoUrl: res.Item.profilePhotoUrl.S,

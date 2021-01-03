@@ -1,5 +1,5 @@
 import { BaseSyntheticEvent, useContext } from "react";
-import { signIn, AppContext } from "@frontend/context/app-context/context";
+import { signIn, AppContext } from "context/app-context/context";
 import {
   Modal,
   ModalOverlay,

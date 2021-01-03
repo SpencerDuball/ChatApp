@@ -1,8 +1,7 @@
 import { HStack, StackProps, Avatar, Text, useToken } from "@chakra-ui/react";
-import filterProps from "@frontend/util/filterProps";
+import filterProps from "util/filterProps";
 
 export interface ContactItemProps extends StackProps {
-  sub: string;
   givenName: string;
   familyName: string;
   profilePhotoUrl?: string;
@@ -20,7 +19,6 @@ export const ContactItem = (props: ContactItemProps) => {
       as="button"
       outline="none"
       w="full"
-      key={props.sub}
       bgColor={props.isSelected ? "brand.red.100" : "none"}
       px={3}
       py={2}
