@@ -64,6 +64,11 @@ export class ApiPlane extends cdk.Stack {
           title: "ChatAppContactsApi",
           version: "1.0.0",
         },
+        "x-amazon-apigateway-cors": {
+          allowOrigins: ["*"],
+          allowHeaders: ["*"],
+          allowMethods: ["*"],
+        },
         paths: {
           "/contact": {
             post: {

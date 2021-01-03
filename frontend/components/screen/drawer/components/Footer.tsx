@@ -1,6 +1,6 @@
 import { forwardRef } from "react";
 import { Grid, GridProps, useToken } from "@chakra-ui/react";
-import hexToRGB from "@frontend/util/hexToRGB";
+import hexToRGB from "util/hexToRGB";
 
 export interface FooterProps extends GridProps {}
 

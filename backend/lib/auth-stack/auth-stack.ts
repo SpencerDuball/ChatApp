@@ -46,6 +46,7 @@ export class AuthStack extends cdk.Stack {
           "ALLOW_USER_SRP_AUTH",
           "ALLOW_REFRESH_TOKEN_AUTH",
           "ALLOW_CUSTOM_AUTH",
+          "ALLOW_USER_PASSWORD_AUTH",
         ],
         generateSecret: false,
         idTokenValidity: 1, // in hours

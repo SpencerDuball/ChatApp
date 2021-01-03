@@ -1,26 +1,35 @@
-import { useRef, useState, useLayoutEffect } from "react";
+import {
+  useRef,
+  useState,
+  useEffect,
+  useContext,
+  Dispatch,
+  SetStateAction,
+} from "react";
 import { Box, BoxProps, VStack, IconButton, Icon } from "@chakra-ui/react";
 import { IoChatbubble, IoPeople } from "react-icons/io5";
-import { ContactItem } from "@frontend/components/li/ContactItem";
-import { Header } from "@frontend/components/screen/drawer/Header";
-import { Footer } from "@frontend/components/screen/drawer/Footer";
+import { ContactItem } from "components/li/ContactItem";
+import { ContactItemSkeleton } from "components/li/ContactItemSkeleton";
+import { Header } from "components/screen/drawer/components/Header";
+import { Footer } from "components/screen/drawer/components/Footer";
+import { useQuery } from "react-query";
+import { API } from "api/API";
+import { AppContext } from "context/app-context/context";
+import { ContactI } from "api/types";
 
-export interface DrawerProps extends BoxProps {}
+export interface DrawerProps extends BoxProps {
+  contactInfo: {
+    selectedContact: ContactI;
+    setSelectedContact: Dispatch<SetStateAction<ContactI>>;
+  };
+}
 
 export const Drawer = (props: DrawerProps) => {
   // use refs to collect header & footer height values
   const headerRef = useRef(null);
   const footerRef = useRef(null);
   const [heightOf, setHeightOf] = useState({ header: "0px", footer: "0px" });
-
-  // header controlled input
-  const [headerValue, setHeaderValue] = useState("");
-
-  // drawer control
-  const [currentDrawer, setCurrentDrawer] = useState("chats");
-
-  // TODO: extract to hook
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (headerRef && headerRef.current && footerRef && footerRef.current) {
       setHeightOf({
         header: `${headerRef.current.clientHeight}px`,
@@ -29,6 +38,21 @@ export const Drawer = (props: DrawerProps) => {
     }
   }, []);
 
+  // drawer UI control
+  const [headerValue, setHeaderValue] = useState("");
+  const [currentDrawer, setCurrentDrawer] = useState("chats");
+
+  // API data
+  const [state] = useContext(AppContext);
+  const contacts = useQuery(
+    "contacts",
+    async () => {
+      const res = await API.get("/test/contacts");
+      return res.data;
+    },
+    { enabled: !!state.credentials }
+  );
+
   return (
     <Box bgColor="brand.gray.50" position="relative" {...props}>
       <Header
@@ -36,36 +60,27 @@ export const Drawer = (props: DrawerProps) => {
         position="absolute"
         top="0"
         left="0"
-        title="Contacts"
+        title={currentDrawer === "chats" ? "Chats" : "Contacts"}
         value={headerValue}
         handleChange={(e) => setHeaderValue(e.target.value)}
       />
       {/* Content */}
       <Box h="full" w="full" overflow="auto">
         <VStack pt={heightOf.header} pb={heightOf.footer} spacing={1} px={3}>
-          <ContactItem sub="809dfs20" givenName="Spencer" familyName="Duball" />
-          <ContactItem sub="80dfs20" givenName="Luke" familyName="Duball" />
-          <ContactItem sub="89dfs20" givenName="Jerry" familyName="Duball" />
-          <ContactItem sub="809fs20" givenName="Russ" familyName="Hannamen" />
-          <ContactItem sub="809ds20" givenName="Keri" familyName="Washington" />
-          <ContactItem sub="809df20" givenName="Robert" familyName="Duvall" />
-          <ContactItem sub="809dfs0" givenName="Russell" familyName="Stewart" />
-          <ContactItem
-            sub="82"
-            isSelected
-            givenName="Tyfus"
-            familyName="Kerfa"
-          />
-          <ContactItem sub="809d" givenName="Alski" familyName="Stenba" />
-          <ContactItem sub="39022094" givenName="Brad" familyName="Pitt" />
-          <ContactItem sub="3902193" givenName="Hillary" familyName="Clinton" />
-          <ContactItem sub="kdjlfsp" givenName="Donald" familyName="Trump" />
-          <ContactItem sub="1093fkl" givenName="Carrot" familyName="Stick" />
-          <ContactItem sub="dlksf" givenName="Morgan" familyName="Freeman" />
-          <ContactItem sub="djfs00-" givenName="Flem" familyName="Bot" />
-          <ContactItem sub="1jofij" givenName="Tracy" familyName="Morgan" />
-          <ContactItem sub="4kjfs" givenName="Kagney" familyName="White" />
-          <ContactItem sub="490fj" givenName="Riley" familyName="Racker" />
+          {contacts.data
+            ? contacts.data.body.map((contact) => (
+                <ContactItem
+                  key={contact.id}
+                  givenName={contact.givenName}
+                  familyName={contact.familyName}
+                  profilePhotoUrl={
+                    contact.profilePhotoUrl ? contact.profilePhotoUrl : null
+                  }
+                />
+              ))
+            : Array.from({ length: 5 }).map((_, key) => (
+                <ContactItemSkeleton key={key} />
+              ))}
         </VStack>
       </Box>
       <Footer ref={footerRef} position="absolute" bottom="0" left="0">

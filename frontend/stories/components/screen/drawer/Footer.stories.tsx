@@ -1,7 +1,10 @@
 import React from "react";
 import { Story, Meta } from "@storybook/react";
 
-import { Footer, FooterProps } from "@frontend/components/screen/drawer/Footer";
+import {
+  Footer,
+  FooterProps,
+} from "@frontend/components/screen/drawer/components/Footer";
 
 export default {
   title: "components/screen/drawer/Footer",

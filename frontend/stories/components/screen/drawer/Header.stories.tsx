@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 import { Story, Meta } from "@storybook/react";
 
-import { Header, HeaderProps } from "@frontend/components/screen/drawer/Header";
+import {
+  Header,
+  HeaderProps,
+} from "@frontend/components/screen/drawer/components/Header";
 
 export default {
   title: "components/screen/drawer/Header",
