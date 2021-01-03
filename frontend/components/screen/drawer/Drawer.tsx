@@ -8,7 +8,9 @@ import { Footer } from "components/screen/drawer/components/Footer";
 import {
   MessengerContext,
   setSelectedContact,
+  setSelectedView,
 } from "context/messenger-context/context";
+import { stringify } from "querystring";
 
 export interface DrawerProps extends BoxProps {}
 
@@ -28,10 +30,44 @@ export const Drawer = (props: DrawerProps) => {
 
   // drawer UI control
   const [headerValue, setHeaderValue] = useState("");
-  const [currentDrawer, setCurrentDrawer] = useState("chats");
+  const headerValueRegex = new RegExp(
+    headerValue
+      .split(" ")
+      .reduce((accumulator, newValue) => accumulator + "|" + newValue),
+    "gi"
+  );
 
   // API data
   const [state, dispatch] = useContext(MessengerContext);
+
+  const contactItems = state.contacts
+    ? state.contacts.map((contact) => {
+        const contactItem = (
+          <ContactItem
+            key={contact.id}
+            givenName={contact.givenName}
+            familyName={contact.familyName}
+            profilePhotoUrl={
+              contact.profilePhotoUrl ? contact.profilePhotoUrl : null
+            }
+            isSelected={
+              state.selectedContact && state.selectedContact.id === contact.id
+            }
+            onClick={() => setSelectedContact(dispatch, contact)}
+          />
+        );
+
+        if (headerValue) {
+          const name = [contact.givenName, contact.familyName].reduce(
+            (accumulator, newValue) => accumulator + "|" + newValue
+          );
+          if (name.match(headerValueRegex)) return contactItem;
+          else return null;
+        } else return contactItem;
+      })
+    : Array.from({ length: 5 }).map((_, key) => (
+        <ContactItemSkeleton key={key} />
+      ));
 
   return (
     <Box bgColor="brand.gray.50" position="relative" {...props}>
@@ -40,29 +76,14 @@ export const Drawer = (props: DrawerProps) => {
         position="absolute"
         top="0"
         left="0"
-        title={currentDrawer === "chats" ? "Chats" : "Contacts"}
+        title={state.selectedView === "CHAT" ? "Chats" : "Contacts"}
         value={headerValue}
         handleChange={(e) => setHeaderValue(e.target.value)}
       />
       {/* Content */}
       <Box h="full" w="full" overflow="auto">
         <VStack pt={heightOf.header} pb={heightOf.footer} spacing={1} px={3}>
-          {state.contacts
-            ? state.contacts.map((contact) => (
-                <ContactItem
-                  key={contact.id}
-                  givenName={contact.givenName}
-                  familyName={contact.familyName}
-                  profilePhotoUrl={
-                    contact.profilePhotoUrl ? contact.profilePhotoUrl : null
-                  }
-                  isSelected={state.selectedContact.id === contact.id}
-                  onClick={() => setSelectedContact(dispatch, contact)}
-                />
-              ))
-            : Array.from({ length: 5 }).map((_, key) => (
-                <ContactItemSkeleton key={key} />
-              ))}
+          {state.selectedView === "CONTACT" ? contactItems : null}
         </VStack>
       </Box>
       <Footer ref={footerRef} position="absolute" bottom="0" left="0">
@@ -72,12 +93,14 @@ export const Drawer = (props: DrawerProps) => {
           _focus={{ boxShadow: "none" }}
           _active={{ bg: "none" }}
           _hover={{ bg: "none" }}
-          onClick={() => setCurrentDrawer("chats")}
+          onClick={() => setSelectedView(dispatch, "CHAT")}
           icon={
             <Icon
               as={IoChatbubble}
               fill={
-                currentDrawer === "chats" ? "brand.red.100" : "brand.gray.100"
+                state.selectedView === "CHAT"
+                  ? "brand.red.100"
+                  : "brand.gray.100"
               }
               h={6}
               w={6}
@@ -90,12 +113,12 @@ export const Drawer = (props: DrawerProps) => {
           _focus={{ boxShadow: "none" }}
           _active={{ bg: "none" }}
           _hover={{ bg: "none" }}
-          onClick={() => setCurrentDrawer("contacts")}
+          onClick={() => setSelectedView(dispatch, "CONTACT")}
           icon={
             <Icon
               as={IoPeople}
               fill={
-                currentDrawer === "contacts"
+                state.selectedView === "CONTACT"
                   ? "brand.red.100"
                   : "brand.gray.100"
               }

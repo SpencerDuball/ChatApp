@@ -20,6 +20,12 @@ const reducer = (
         selectedContact: action.payload.selectedContact,
       };
 
+    case "SET_SELECTED_VIEW":
+      return {
+        ...state,
+        selectedView: action.payload.selectedView,
+      };
+
     default: {
       throw new Error(`The action type: ${action.type} does not exist.`);
     }

@@ -13,6 +13,7 @@ import { API } from "api/API";
 const initialState: MessengerContextStateI = {
   contacts: null,
   selectedContact: null,
+  selectedView: "CHAT",
 };
 
 // create context
@@ -43,6 +44,11 @@ export const setSelectedContact = (
     type: "SET_SELECTED_CONTACT",
     payload: { selectedContact: contact },
   });
+
+export const setSelectedView = (
+  dispatch: Dispatch<MessengerContextReducerActionI>,
+  view: "CHAT" | "CONTACT"
+) => dispatch({ type: "SET_SELECTED_VIEW", payload: { selectedView: view } });
 
 // provider
 export const MessengerContextProvider = (props: {

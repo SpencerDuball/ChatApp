@@ -3,7 +3,11 @@ import { Amplify, withSSRContext } from "aws-amplify";
 import awsConfig from "../aws-config";
 import { Box, Grid, useToken } from "@chakra-ui/react";
 import { Drawer } from "components/screen/drawer/Drawer";
-import { MessengerContextProvider } from "context/messenger-context/context";
+import {
+  MessengerContextProvider,
+  MessengerContext,
+} from "context/messenger-context/context";
+import ContactView from "components/screen/main/contactView/ContactView";
 
 // Must do this for every page until issue is resolved: https://github.com/vercel/next.js/issues/16977
 Amplify.configure({ ...awsConfig, ssr: true });
@@ -32,10 +36,18 @@ const Messenger = () => {
           borderRight={{ base: "none", md: `1px solid ${brandGray200}` }}
           gridColumn={{ base: "1 / span 1", md: "1 / span 1" }}
         />
-        <Box
-          gridRow="1 / span 1"
-          gridColumn={{ base: "1 / span 1", md: "2 / span 1" }}
-        />
+        <MessengerContext.Consumer>
+          {([state]) => {
+            if (state.selectedView === "CONTACT")
+              return (
+                <ContactView
+                  gridRow="1 / span 1"
+                  gridColumn={{ base: "1 / span 1", md: "2 / span 1" }}
+                />
+              );
+            else return <p>hi</p>;
+          }}
+        </MessengerContext.Consumer>
       </MessengerContextProvider>
     </Grid>
   );

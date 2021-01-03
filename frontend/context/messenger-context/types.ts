@@ -4,6 +4,7 @@ import { ContactI } from "api/types";
 export interface MessengerContextStateI {
   contacts: ContactI[] | null;
   selectedContact: ContactI | null;
+  selectedView: "CHAT" | "CONTACT";
 }
 export interface MessengerContextReducerActionI {
   type: string;
