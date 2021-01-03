@@ -30,12 +30,7 @@ export const Drawer = (props: DrawerProps) => {
 
   // drawer UI control
   const [headerValue, setHeaderValue] = useState("");
-  const headerValueRegex = new RegExp(
-    headerValue
-      .split(" ")
-      .reduce((accumulator, newValue) => accumulator + "|" + newValue),
-    "gi"
-  );
+  const headerValueRegex = new RegExp(`^${headerValue}`, "i");
 
   // API data
   const [state, dispatch] = useContext(MessengerContext);
@@ -58,10 +53,11 @@ export const Drawer = (props: DrawerProps) => {
         );
 
         if (headerValue) {
-          const name = [contact.givenName, contact.familyName].reduce(
-            (accumulator, newValue) => accumulator + "|" + newValue
-          );
-          if (name.match(headerValueRegex)) return contactItem;
+          if (
+            contact.givenName.match(headerValueRegex) ||
+            contact.familyName.match(headerValueRegex)
+          )
+            return contactItem;
           else return null;
         } else return contactItem;
       })
