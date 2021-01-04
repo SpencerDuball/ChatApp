@@ -43,6 +43,7 @@ const Messenger = () => {
                 <ContactView
                   gridRow="1 / span 1"
                   gridColumn={{ base: "1 / span 1", md: "2 / span 1" }}
+                  contact={state.selectedContact}
                 />
               );
             else return <p>hi</p>;
