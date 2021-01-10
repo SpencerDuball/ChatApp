@@ -18,6 +18,7 @@ export const IdDisplay = (props: IdDisplay) => {
           whiteSpace="nowrap"
           textOverflow="ellipsis"
           fontSize="xs"
+          textAlign="center"
         >
           {props.children}
         </Text>

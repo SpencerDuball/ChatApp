@@ -33,7 +33,7 @@ const ContactView = (props: ContactViewProps) => {
         <Grid
           gridTemplateColumns="auto minmax(0, 1fr) auto"
           w="full"
-          maxW="400px"
+          maxW="600px"
           gap={3}
         >
           <StackedIconButton

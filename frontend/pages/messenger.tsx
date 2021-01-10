@@ -38,15 +38,17 @@ const Messenger = () => {
         />
         <MessengerContext.Consumer>
           {([state]) => {
-            if (state.selectedView === "CONTACT")
-              return (
-                <ContactView
-                  gridRow="1 / span 1"
-                  gridColumn={{ base: "1 / span 1", md: "2 / span 1" }}
-                  contact={state.selectedContact}
-                />
-              );
-            else return <p>hi</p>;
+            if (state.selectedView === "CONTACT") {
+              if (state.selectedContact)
+                return (
+                  <ContactView
+                    gridRow="1 / span 1"
+                    gridColumn={{ base: "1 / span 1", md: "2 / span 1" }}
+                    contact={state.selectedContact}
+                  />
+                );
+              else return <p>No selectedContact</p>;
+            } else return <p>hi</p>;
           }}
         </MessengerContext.Consumer>
       </MessengerContextProvider>
@@ -60,10 +62,17 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   // redirect user to '/sign_in' if not authenticated
   try {
     // check if signed in
-    await SSR.Auth.currentAuthenticatedUser().catch((e) =>
-      // currentAuthenticatedUser() might throw if the accessId has expired
-      // call currentSession() to get new tokens if refreshToken is still valid
-      SSR.Auth.currentSession()
+    console.log(
+      await SSR.Auth.currentAuthenticatedUser().catch((e) => {
+        // currentAuthenticatedUser() might throw if the accessId has expired
+        // call currentSession() to get new tokens if refreshToken is still valid
+        console.log("Now trying Auth.currentSession() ... ", e);
+        SSR.Auth.currentSession()
+          .then((data) => console.log(data))
+          .catch((e) =>
+            console.log("Logging error from Auth.currentSession() ...", e)
+          );
+      })
     );
     return { props: {} };
   } catch (error) {

@@ -10,7 +10,6 @@ import {
   setSelectedContact,
   setSelectedView,
 } from "context/messenger-context/context";
-import { stringify } from "querystring";
 
 export interface DrawerProps extends BoxProps {}
 

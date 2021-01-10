@@ -63,8 +63,6 @@ export const MessengerContextProvider = (props: {
     async () => {
       const res = await API.get("/test/contacts");
       setContacts(dispatch, res.data.body);
-      if (!state.selectedContact && res.data.body.length > 0)
-        setSelectedContact(dispatch, res.data.body[0]);
       return res.data;
     },
     { enabled: !!appContext.credentials }
