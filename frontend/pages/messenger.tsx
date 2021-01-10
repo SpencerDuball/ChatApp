@@ -43,6 +43,7 @@ const Messenger = () => {
                 <ContactView
                   gridRow="1 / span 1"
                   gridColumn={{ base: "1 / span 1", md: "2 / span 1" }}
+                  zIndex={state.selectedContact ? "10" : "-1"}
                   contact={state.selectedContact}
                 />
               );
