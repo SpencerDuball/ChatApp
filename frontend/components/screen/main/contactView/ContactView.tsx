@@ -1,5 +1,15 @@
-import { Grid, BoxProps, VStack, Avatar, Text, Icon } from "@chakra-ui/react";
+import {
+  Grid,
+  BoxProps,
+  VStack,
+  Avatar,
+  Text,
+  Icon,
+  Center,
+  Box,
+} from "@chakra-ui/react";
 import Header from "./components/Header";
+import MainViewHeader from "components/header/MainViewHeader";
 import { ContactI } from "api/types";
 import { StackedIconButton } from "components/button/StackedIconButton";
 import { IoChatbubbleSharp, IoTrash } from "react-icons/io5";
@@ -10,6 +20,16 @@ interface ContactViewProps extends BoxProps {
 }
 
 const ContactView = (props: ContactViewProps) => {
+  if (!props.contact)
+    return (
+      <Grid gridTemplateRows="min-content 1fr" {...props}>
+        <MainViewHeader />
+        <Center>
+          <Text color="brand.gray.200">No contact selected.</Text>
+        </Center>
+      </Grid>
+    );
+
   return (
     <Grid gridAutoRows="min-content" {...props}>
       <Header>
