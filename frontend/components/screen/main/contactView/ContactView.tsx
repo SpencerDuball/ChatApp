@@ -9,7 +9,6 @@ import {
   Input,
   Textarea,
 } from "@chakra-ui/react";
-import Header from "./components/Header";
 import MainViewHeader from "components/header/MainViewHeader";
 import { ContactI } from "api/types";
 import { StackedIconButton } from "components/button/StackedIconButton";
@@ -30,7 +29,7 @@ interface ContactViewProps extends BoxProps {
 
 const ContactView = (props: ContactViewProps) => {
   const [state, dispatch] = useContext(MessengerContext);
-  const [isEditing, setIsEditing] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
 
   if (!props.contact)
     return (
@@ -44,7 +43,7 @@ const ContactView = (props: ContactViewProps) => {
 
   if (isEditing)
     return (
-      <Grid gridAutoRows="min-content" bgColor="white" {...props}>
+      <Grid gridTemplateRows="min-content 1fr" bgColor="white" {...props}>
         <MainViewHeader
           display="grid"
           gridTemplateColumns="16px 1fr 16px"

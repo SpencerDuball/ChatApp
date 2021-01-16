@@ -3,7 +3,7 @@ import { ComputePlane } from "./compute-plane/ComputePlane";
 import { ApiPlane } from "./api-plane/ApiPlane";
 import * as dynamodb from "@aws-cdk/aws-dynamodb";
 
-export class ContactsServiceStack extends cdk.Stack {
+export class ComputeStack extends cdk.Stack {
   public apiPlane: ApiPlane;
 
   constructor(

@@ -2,24 +2,20 @@
 import "source-map-support/register";
 import * as dotenv from "dotenv";
 import * as cdk from "@aws-cdk/core";
-import { DbStack } from "../lib/db-stack/db-stack";
-import { ContactsServiceStack } from "../lib/contacts-service-stack/contacts-service-stack";
-import { AuthStack } from "../lib/auth-stack/auth-stack";
+import { DbStack } from "../lib/db-stack/DbStack";
+import { ComputeStack } from "../lib/compute-stack/ComputeStack";
+import { AuthStack } from "../lib/auth-stack/AuthStack";
 
 // configure environment variables
 dotenv.config();
 
 const app = new cdk.App();
 const dbStack = new DbStack(app, "DbStack");
-const contactsServiceStack = new ContactsServiceStack(
-  app,
-  "ContactsServiceStack",
-  {
-    ddbTable: dbStack.dynamoDbTable,
-  }
-);
+const computeStack = new ComputeStack(app, "ContactsServiceStack", {
+  ddbTable: dbStack.dynamoDbTable,
+});
 new AuthStack(app, "AuthStack", {
-  contactsApi: contactsServiceStack.apiPlane.contactsApi,
+  contactsApi: computeStack.apiPlane.contactsApi,
 });
 
 // add 'Project' tag

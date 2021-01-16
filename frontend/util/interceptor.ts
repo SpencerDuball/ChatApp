@@ -43,6 +43,7 @@ export const aws4Interceptor = (
   if (!config.url) {
     throw new Error("No URL present in request config, unable to sign request");
   }
+  console.log("Credentials from interceptor ...", credentials);
 
   let url = config.url;
 

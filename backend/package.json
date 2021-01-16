@@ -29,6 +29,7 @@
     "@aws-cdk/aws-lambda": "^1.76.0",
     "@aws-cdk/aws-s3-assets": "^1.76.0",
     "@aws-cdk/core": "^1.76.0",
+    "@aws-sdk/client-apigatewaymanagementapi": "^3.3.0",
     "@aws-sdk/client-apigatewayv2": "^1.0.0-rc.8",
     "@aws-sdk/client-cognito-identity": "^1.0.0-rc.8",
     "@aws-sdk/client-cognito-identity-provider": "^1.0.0-rc.8",

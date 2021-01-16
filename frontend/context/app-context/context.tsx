@@ -88,6 +88,7 @@ const useSetCredentials = (
     if (isLoggedIn) {
       (async () => {
         const credentials = await Auth.currentCredentials();
+        console.log("Got new credentials ...", credentials);
 
         // create new API
         const { accessKeyId, secretAccessKey, sessionToken } = credentials;
@@ -99,6 +100,7 @@ const useSetCredentials = (
         setCredentials(dispatch, credentials);
       })();
     } else {
+      console.log("Error getting new credentials ...");
       setCredentials(dispatch, null);
     }
   };
