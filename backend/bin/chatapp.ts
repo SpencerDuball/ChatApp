@@ -15,7 +15,7 @@ const computeStack = new ComputeStack(app, "ContactsServiceStack", {
   ddbTable: dbStack.dynamoDbTable,
 });
 new AuthStack(app, "AuthStack", {
-  contactsApi: computeStack.apiPlane.contactsApi,
+  contactsApi: computeStack.apiPlane.httpApi,
 });
 
 // add 'Project' tag
