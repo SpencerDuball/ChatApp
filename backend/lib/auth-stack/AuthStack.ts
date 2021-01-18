@@ -7,7 +7,10 @@ export class AuthStack extends cdk.Stack {
   constructor(
     scope: cdk.Construct,
     id: string,
-    props: cdk.StackProps & { contactsApi: apiGwV2.CfnApi }
+    props: cdk.StackProps & {
+      contactsApi: apiGwV2.CfnApi;
+      wsApi: apiGwV2.CfnApi;
+    }
   ) {
     super(scope, id, props);
 
@@ -99,9 +102,12 @@ export class AuthStack extends cdk.Stack {
                 Effect: "Allow",
                 Action: ["execute-api:*"],
                 Resource: [
+                  // httpapi
                   `arn:aws:execute-api:${this.region}:${this.account}:${props.contactsApi.ref}/*/*/contact`,
                   `arn:aws:execute-api:${this.region}:${this.account}:${props.contactsApi.ref}/*/*/contact/*`,
                   `arn:aws:execute-api:${this.region}:${this.account}:${props.contactsApi.ref}/*/*/contacts`,
+                  // ws api
+                  `arn:aws:execute-api:${this.region}:${this.account}:${props.wsApi.ref}/*`,
                 ],
               },
             ],

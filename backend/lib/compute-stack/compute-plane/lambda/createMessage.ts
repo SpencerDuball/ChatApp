@@ -32,5 +32,11 @@ export const handler = async (event: any) => {
   });
 
   // send the command
-  await client.send(command);
+  try {
+    await client.send(command);
+  } catch (e) {
+    return { statusCode: 500 };
+  }
+
+  return { statusCode: 200 };
 };

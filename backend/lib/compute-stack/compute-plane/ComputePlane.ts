@@ -21,7 +21,7 @@ export class ComputePlane extends cdk.Stack {
     const lambdaS3AssetsZip = new assets.Asset(this, "ChatAppLambdaAssets", {
       path: path.join(
         __dirname,
-        "../../../build/lib/contacts-service-stack/compute-plane/lambda"
+        "../../../build/lib/compute-stack/compute-plane/lambda"
       ),
     });
 
@@ -117,6 +117,16 @@ export class ComputePlane extends cdk.Stack {
                     `arn:aws:dynamodb:${this.region}:${this.account}:table/${props.ddbTable.ref}/index`,
                   ],
                 },
+                {
+                  Effect: "Allow",
+                  Action: [
+                    "execute-api:Invoke",
+                    "execute-api:ManageConnections",
+                  ],
+                  Resource: [
+                    `arn:aws:execute-api:${this.region}:${this.account}:*/*/*`,
+                  ],
+                },
               ],
             }),
             policyName: "ChatAppDDBReadPolicy",
@@ -210,6 +220,26 @@ export class ComputePlane extends cdk.Stack {
       "getContacts.handler",
       "This function returns all contacts of a ChatApp user.",
       dynamoDbReadRole
+    );
+
+    // chatService
+    this.lambda.connect = computePlaneLambda(
+      "ChatAppConnectLambda",
+      "connect.handler",
+      "This function initiates a websocket connection",
+      dynamoDbWriteRole
+    );
+    this.lambda.disconnect = computePlaneLambda(
+      "ChatAppDisconnectLambda",
+      "disconnect.handler",
+      "This function disconnects a websocket connection",
+      dynamoDbWriteRole
+    );
+    this.lambda.createMessage = computePlaneLambda(
+      "ChatAppCreateMessageLambda",
+      "createMessage.handler",
+      "This function disconnects a websocket connection",
+      dynamoDbWriteRole
     );
   }
 }

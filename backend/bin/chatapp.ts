@@ -16,6 +16,7 @@ const computeStack = new ComputeStack(app, "ContactsServiceStack", {
 });
 new AuthStack(app, "AuthStack", {
   contactsApi: computeStack.apiPlane.httpApi,
+  wsApi: computeStack.apiPlane.wsApi,
 });
 
 // add 'Project' tag
