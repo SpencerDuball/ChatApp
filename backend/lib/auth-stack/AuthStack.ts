@@ -2,8 +2,13 @@ import * as cdk from "@aws-cdk/core";
 import * as cognito from "@aws-cdk/aws-cognito";
 import * as iam from "@aws-cdk/aws-iam";
 import * as apiGwV2 from "@aws-cdk/aws-apigatewayv2";
+import * as ssm from "@aws-cdk/aws-ssm";
 
 export class AuthStack extends cdk.Stack {
+  private userPool: cognito.CfnUserPool;
+  private userPoolClient: cognito.CfnUserPoolClient;
+  private identityPool: cognito.CfnIdentityPool;
+
   constructor(
     scope: cdk.Construct,
     id: string,
@@ -14,7 +19,7 @@ export class AuthStack extends cdk.Stack {
   ) {
     super(scope, id, props);
 
-    const userPool = new cognito.CfnUserPool(this, "ChatAppUserPool", {
+    this.userPool = new cognito.CfnUserPool(this, "ChatAppUserPool", {
       accountRecoverySetting: {
         recoveryMechanisms: [{ name: "verified_email", priority: 1 }],
       },
@@ -40,7 +45,7 @@ export class AuthStack extends cdk.Stack {
       },
     });
 
-    const userPoolClient = new cognito.CfnUserPoolClient(
+    this.userPoolClient = new cognito.CfnUserPoolClient(
       this,
       "ChatAppUserPoolClient",
       {
@@ -56,11 +61,11 @@ export class AuthStack extends cdk.Stack {
         preventUserExistenceErrors: "ENABLED",
         refreshTokenValidity: 30, // in days
         supportedIdentityProviders: ["COGNITO"],
-        userPoolId: userPool.ref,
+        userPoolId: this.userPool.ref,
       }
     );
 
-    const identityPool = new cognito.CfnIdentityPool(
+    this.identityPool = new cognito.CfnIdentityPool(
       this,
       "ChatAppIdentityPool",
       {
@@ -68,8 +73,8 @@ export class AuthStack extends cdk.Stack {
         allowUnauthenticatedIdentities: false,
         cognitoIdentityProviders: [
           {
-            clientId: userPoolClient.ref,
-            providerName: userPool.attrProviderName,
+            clientId: this.userPoolClient.ref,
+            providerName: this.userPool.attrProviderName,
             serverSideTokenCheck: true,
           },
         ],
@@ -85,7 +90,7 @@ export class AuthStack extends cdk.Stack {
             Action: "sts:AssumeRoleWithWebIdentity",
             Condition: {
               StringEquals: {
-                "cognito-identity.amazonaws.com:aud": identityPool.ref,
+                "cognito-identity.amazonaws.com:aud": this.identityPool.ref,
               },
               "ForAnyValue:StringLike": {
                 "cognito-identity.amazonaws.com:amr": "authenticated",
@@ -121,11 +126,11 @@ export class AuthStack extends cdk.Stack {
       this,
       "IdentityPoolAuthRoleAttachment",
       {
-        identityPoolId: identityPool.ref,
+        identityPoolId: this.identityPool.ref,
         roleMappings: {
           ChatAppTesterShizip: {
             ambiguousRoleResolution: "AuthenticatedRole",
-            identityProvider: `cognito-idp.${this.region}.amazonaws.com/${userPool.ref}:${userPoolClient.ref}`,
+            identityProvider: `cognito-idp.${this.region}.amazonaws.com/${this.userPool.ref}:${this.userPoolClient.ref}`,
             type: "Token",
           },
         },
@@ -134,5 +139,31 @@ export class AuthStack extends cdk.Stack {
         },
       }
     );
+
+    // create parameters
+    new ssm.CfnParameter(this, "ChatAppSSM-Test-Region", {
+      description: "The aws region.",
+      name: "/ChatApp/test/region",
+      type: "String",
+      value: this.region,
+    });
+    new ssm.CfnParameter(this, "ChatAppSSM-Test-UserPoolClientId", {
+      description: "The UserPoolClientId from the Cognito user pool.",
+      name: "/ChatApp/test/user_pool_client_id",
+      type: "String",
+      value: this.userPoolClient.ref,
+    });
+    new ssm.CfnParameter(this, "ChatAppSSM-Test-UserPoolId", {
+      description: "The UserPoolId from the Cognito user pool.",
+      name: "/ChatApp/test/user_pool_id",
+      type: "String",
+      value: this.userPool.ref,
+    });
+    new ssm.CfnParameter(this, "ChatAppSSM-Test-IdentityPoolId", {
+      description: "The IdentityPoolId from the Cognito user pool",
+      name: "/ChatApp/test/identity_pool_id",
+      type: "String",
+      value: this.identityPool.ref,
+    });
   }
 }
