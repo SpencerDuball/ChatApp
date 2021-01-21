@@ -10,19 +10,14 @@ dotenv.config();
 (async () => {
   // get credentials
   const { Credentials } = await getTempCredentials({
-    region: process.env.TEST_REGION!,
-    userPoolId: process.env.TEST_USER_POOL_ID!,
-    userPoolClientId: process.env.TEST_USER_POOL_CLIENT_ID!,
-    identityPoolId: process.env.TEST_IDENTITY_POOL_ID!,
-  })(
-    process.env.TEST_CREDENTIAL_USERNAME!,
-    process.env.TEST_CREDENTIAL_PASSWORD!
-  );
+    region: process.env.REGION!,
+    userPoolId: process.env.USER_POOL_ID!,
+    userPoolClientId: process.env.USER_POOL_CLIENT_ID!,
+    identityPoolId: process.env.IDENTITY_POOL_ID!,
+  })(process.env.USERNAME!, process.env.PASSWORD!);
 
   try {
-    const url = new URL(
-      "wss://qlln8gqu1e.execute-api.us-east-1.amazonaws.com/test"
-    );
+    const url = new URL(process.env.WS_API_URL);
     const signedRequest = aws4.sign(
       {
         host: url.host,

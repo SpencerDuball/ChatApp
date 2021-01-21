@@ -53,18 +53,15 @@ const updateContactTest2 = async (API: AxiosInstance) => {
 (async () => {
   // get credentials
   const { Credentials } = await getTempCredentials({
-    region: process.env.TEST_REGION!,
-    userPoolId: process.env.TEST_USER_POOL_ID!,
-    userPoolClientId: process.env.TEST_USER_POOL_CLIENT_ID!,
-    identityPoolId: process.env.TEST_IDENTITY_POOL_ID!,
-  })(
-    process.env.TEST_CREDENTIAL_USERNAME!,
-    process.env.TEST_CREDENTIAL_PASSWORD!
-  );
+    region: process.env.REGION!,
+    userPoolId: process.env.USER_POOL_ID!,
+    userPoolClientId: process.env.USER_POOL_CLIENT_ID!,
+    identityPoolId: process.env.IDENTITY_POOL_ID!,
+  })(process.env.USERNAME!, process.env.PASSWORD!);
 
   // setup aws4 interceptor
   const API = axios.create({
-    baseURL: "https://9lmy17l4sa.execute-api.us-east-1.amazonaws.com",
+    baseURL: process.env.HTTP_API_URL,
   });
   API.interceptors.request.use(
     aws4Interceptor(

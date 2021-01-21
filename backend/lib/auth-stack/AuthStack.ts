@@ -165,5 +165,19 @@ export class AuthStack extends cdk.Stack {
       type: "String",
       value: this.identityPool.ref,
     });
+    const USERNAME = "spencerduball@gmail.com";
+    const PASSWORD = "password";
+    new ssm.CfnParameter(this, "ChatAppSSM-Test-TestCognitoUsername", {
+      description: "The username of the test cognito user.",
+      name: "/ChatApp/test/username",
+      type: "String",
+      value: USERNAME,
+    });
+    new ssm.CfnParameter(this, "ChatAppSSM-Test-TestCognitoPassword", {
+      description: "The password of the test cognito user.",
+      name: "/ChatApp/test/password",
+      type: "String",
+      value: PASSWORD,
+    });
   }
 }
