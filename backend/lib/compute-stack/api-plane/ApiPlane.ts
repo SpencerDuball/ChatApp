@@ -2,6 +2,7 @@ import * as cdk from "@aws-cdk/core";
 import * as apiGwV2 from "@aws-cdk/aws-apigatewayv2";
 import * as lambda from "@aws-cdk/aws-lambda";
 import * as iam from "@aws-cdk/aws-iam";
+import * as ssm from "@aws-cdk/aws-ssm";
 
 interface ComputePlaneLambda {
   lambda: {
@@ -271,5 +272,19 @@ export class ApiPlane extends cdk.Stack {
 
     createHttpApi(this, props);
     createWsApi(this, props);
+
+    // add parameters
+    new ssm.CfnParameter(this, "ChatAppSSM-Test-TestCognitoUsername", {
+      description: "The HTTP API endpoint.",
+      name: "/ChatApp/test/http_api_url",
+      type: "String",
+      value: `wss://${this.httpApi.ref}.execute-api.${this.region}.amazonaws.com/test`,
+    });
+    new ssm.CfnParameter(this, "ChatAppSSM-Test-TestCognitoPassword", {
+      description: "The WS API endpoint.",
+      name: "/ChatApp/test/ws_api_url",
+      type: "String",
+      value: `https://${this.wsApi.ref}.execute-api.${this.region}.amazonaws.com/test`,
+    });
   }
 }

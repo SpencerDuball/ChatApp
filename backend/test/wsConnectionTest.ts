@@ -1,7 +1,8 @@
 import * as dotenv from "dotenv";
 import { getTempCredentials } from "../util/getTempCredentials";
 import * as WebSocket from "ws";
-import { Signer } from "aws-amplify";
+import * as aws4 from "aws4";
+import { URL } from "url";
 
 // configure environment variables
 dotenv.config();
@@ -9,27 +10,31 @@ dotenv.config();
 (async () => {
   // get credentials
   const { Credentials } = await getTempCredentials({
-    region: process.env.TEST_REGION!,
-    userPoolId: process.env.TEST_USER_POOL_ID!,
-    userPoolClientId: process.env.TEST_USER_POOL_CLIENT_ID!,
-    identityPoolId: process.env.TEST_IDENTITY_POOL_ID!,
-  })(
-    process.env.TEST_CREDENTIAL_USERNAME!,
-    process.env.TEST_CREDENTIAL_PASSWORD!
-  );
+    region: process.env.REGION!,
+    userPoolId: process.env.USER_POOL_ID!,
+    userPoolClientId: process.env.USER_POOL_CLIENT_ID!,
+    identityPoolId: process.env.IDENTITY_POOL_ID!,
+  })(process.env.USERNAME!, process.env.PASSWORD!);
 
   try {
-    const signedUrl = Signer.signUrl(
-      "wss://qlln8gqu1e.execute-api.us-east-1.amazonaws.com/test",
+    const url = new URL(process.env.WS_API_URL);
+    const signedRequest = aws4.sign(
       {
-        access_key: Credentials!.AccessKeyId,
-        secret_key: Credentials!.SecretKey,
-        session_token: Credentials!.SessionToken,
+        host: url.host,
+        path: url.pathname + url.search,
+        signQuery: true,
+      },
+      {
+        accessKeyId: Credentials!.AccessKeyId,
+        secretAccessKey: Credentials!.SecretKey,
+        sessionToken: Credentials!.SessionToken,
       }
     );
 
     // create connection
-    const ws = new WebSocket(signedUrl);
+    const ws = new WebSocket(
+      `${url.protocol}//${signedRequest.host}${signedRequest.path}`
+    );
 
     ws.onopen = (e) => {
       console.log("Connection has opened ...");
