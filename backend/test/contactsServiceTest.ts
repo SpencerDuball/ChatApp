@@ -6,49 +6,35 @@ import { aws4Interceptor } from "aws4-axios";
 // configure environment variables
 dotenv.config();
 
-const createContactTest = async (API: AxiosInstance) => {
-  const createContactRes = await API.post("/test/contact", {
+const createContactTest = async (API: AxiosInstance) =>
+  await API.post("/test/contact", {
     sub: "test_user_sub",
     givenName: "Test",
     familyName: "User",
     profilePhotoUrl: "https://www.testurl.com",
     notes: "",
   });
-  return createContactRes;
-};
 
-const getContactTest = async (API: AxiosInstance) => {
-  const getContactRes = await API.get("/test/contact/test_user_sub");
-  return getContactRes;
-};
+const getContactTest = async (API: AxiosInstance) =>
+  await API.get("/test/contact/test_user_sub");
 
-const deleteContactTest = async (API: AxiosInstance) => {
-  const deleteContactRes = await API.delete(
-    "/test/contact/d1653350-03bd-4cb9-b256-afe4f250d4a2"
-  );
-  return deleteContactRes;
-};
+const deleteContactTest = async (API: AxiosInstance) =>
+  await API.delete("/test/contact/d1653350-03bd-4cb9-b256-afe4f250d4a2");
 
-const getContactsTest = async (API: AxiosInstance) => {
-  const getContactsRes = await API.get("/test/contacts");
-  return getContactsRes;
-};
+const getContactsTest = async (API: AxiosInstance) =>
+  await API.get("/test/contacts");
 
-const updateContactTest1 = async (API: AxiosInstance) => {
-  const updateContactRes = await API.patch("/test/contact/test_user_sub", {
+const updateContactTest1 = async (API: AxiosInstance) =>
+  await API.patch("/test/contact/test_user_sub", {
     givenName: "Leroy",
     notes: "Hello there this is notes.",
   });
-  return updateContactRes;
-};
 
-const updateContactTest2 = async (API: AxiosInstance) => {
-  const updateContactRes = await API.patch("/test/contact/test_user_sub", {
+const updateContactTest2 = async (API: AxiosInstance) =>
+  await API.patch("/test/contact/test_user_sub", {
     familyName: "Jenkinsaaaahhhh",
     notes: "This update has finished",
   });
-  return updateContactRes;
-};
 
 (async () => {
   // get credentials
