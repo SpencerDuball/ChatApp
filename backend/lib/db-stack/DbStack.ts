@@ -21,8 +21,8 @@ export class DbStack extends cdk.Stack {
         {
           indexName: "UserChats",
           keySchema: [
-            { attributeName: "GPKI", keyType: "HASH" },
-            { attributeName: "GSKI", keyType: "RANGE" },
+            { attributeName: "GSIPK", keyType: "HASH" },
+            { attributeName: "GSISK", keyType: "RANGE" },
           ],
           projection: {
             projectionType: "KEYS_ONLY",
