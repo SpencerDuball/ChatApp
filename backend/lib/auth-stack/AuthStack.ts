@@ -1,6 +1,7 @@
 import * as cdk from "@aws-cdk/core";
 import * as cognito from "@aws-cdk/aws-cognito";
 import * as iam from "@aws-cdk/aws-iam";
+import * as ssm from "@aws-cdk/aws-ssm";
 
 interface AuthStackPropsI extends cdk.StackProps {}
 
@@ -176,6 +177,61 @@ const createIdentityPoolRoleAttachment = (
     },
   });
 
+/**
+ * Store SSM parameters.
+ *
+ * @param scope - scope in which this resource is defined.
+ * @param id - scoped id of the resource.
+ * @param props - The properties used to create a SSM Parameters.
+ */
+const storeParameterStoreValues = (
+  scope: cdk.Stack,
+  props: {
+    webClient: cognito.CfnUserPoolClient;
+    userPool: cognito.CfnUserPool;
+    identityPool: cognito.CfnIdentityPool;
+  }
+) => {
+  new ssm.CfnParameter(scope, "ChatAppSSM-Test-Region", {
+    description: "The aws region.",
+    name: "/ChatApp/test/region",
+    type: "String",
+    value: scope.region,
+  });
+  new ssm.CfnParameter(scope, "ChatAppSSM-Test-UserPoolClientId", {
+    description: "The UserPoolClientId from the Cognito user pool.",
+    name: "/ChatApp/test/user_pool_client_id",
+    type: "String",
+    value: props.webClient.ref,
+  });
+  new ssm.CfnParameter(scope, "ChatAppSSM-Test-UserPoolId", {
+    description: "The UserPoolId from the Cognito user pool.",
+    name: "/ChatApp/test/user_pool_id",
+    type: "String",
+    value: props.userPool.ref,
+  });
+  new ssm.CfnParameter(scope, "ChatAppSSM-Test-IdentityPoolId", {
+    description: "The IdentityPoolId from the Cognito user pool",
+    name: "/ChatApp/test/identity_pool_id",
+    type: "String",
+    value: props.identityPool.ref,
+  });
+  const USERNAME = "spencerduball@gmail.com";
+  const PASSWORD = "password";
+  new ssm.CfnParameter(scope, "ChatAppSSM-Test-TestCognitoUsername", {
+    description: "The username of the test cognito user.",
+    name: "/ChatApp/test/username",
+    type: "String",
+    value: USERNAME,
+  });
+  new ssm.CfnParameter(scope, "ChatAppSSM-Test-TestCognitoPassword", {
+    description: "The password of the test cognito user.",
+    name: "/ChatApp/test/password",
+    type: "String",
+    value: PASSWORD,
+  });
+};
+
 export class AuthStack extends cdk.Stack {
   private userPool: cognito.CfnUserPool;
   private userPoolClients: {
@@ -224,5 +280,12 @@ export class AuthStack extends cdk.Stack {
         authenticatedRole: this.authenticatedRole,
       }
     );
+
+    // store parameter store values
+    storeParameterStoreValues(this, {
+      webClient: this.userPoolClients.web,
+      userPool: this.userPool,
+      identityPool: this.identityPool,
+    });
   }
 }
