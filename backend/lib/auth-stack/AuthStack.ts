@@ -3,8 +3,6 @@ import * as cognito from "@aws-cdk/aws-cognito";
 import * as iam from "@aws-cdk/aws-iam";
 import * as ssm from "@aws-cdk/aws-ssm";
 
-interface AuthStackPropsI extends cdk.StackProps {}
-
 /**
  * Creates a CfnUserPool construct.
  *
@@ -43,7 +41,7 @@ const createUserPool = (scope: cdk.Stack, id: string) =>
  *
  * @param scope - scope in which this resource is defined.
  * @param id - scoped id of the resouce.
- * @param props - the UserPool that this UserPoolClient is attached to.
+ * @param props - the properties of the resource.
  */
 const createWebClient = (
   scope: cdk.Stack,
@@ -71,7 +69,7 @@ const createWebClient = (
  *
  * @param scope - scope in which this resource is defined.
  * @param id - scoped id of the resouce.
- * @param props - The properties used to create a CfnIdentityPool.
+ * @param props - the properties of the resource.
  */
 const createIdentityPool = (
   scope: cdk.Stack,
@@ -98,7 +96,7 @@ const createIdentityPool = (
  *
  * @param scope - scope in which this resource is defined.
  * @param id - scoped id of the resource.
- * @param props - The properties used to create a CfnIdentityPool.
+ * @param props - the properties of the resource.
  */
 const createAuthenticatedRoles = (
   scope: cdk.Stack,
@@ -151,7 +149,7 @@ const createAuthenticatedRoles = (
  *
  * @param scope - scope in which this resource is defined.
  * @param id - scoped id of the resource.
- * @param props - The properties used to create a CfnIdentityPool.
+ * @param props - the properties of the resource.
  */
 const createIdentityPoolRoleAttachment = (
   scope: cdk.Stack,
@@ -182,7 +180,7 @@ const createIdentityPoolRoleAttachment = (
  *
  * @param scope - scope in which this resource is defined.
  * @param id - scoped id of the resource.
- * @param props - The properties used to create a SSM Parameters.
+ * @param props - the properties of the resource.
  */
 const storeParameterStoreValues = (
   scope: cdk.Stack,
@@ -231,6 +229,8 @@ const storeParameterStoreValues = (
     value: PASSWORD,
   });
 };
+
+interface AuthStackPropsI extends cdk.StackProps {}
 
 export class AuthStack extends cdk.Stack {
   private userPool: cognito.CfnUserPool;
