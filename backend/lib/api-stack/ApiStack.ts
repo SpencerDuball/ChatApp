@@ -7,6 +7,8 @@ import * as iam from "@aws-cdk/aws-iam";
 import * as dynamodb from "@aws-cdk/aws-dynamodb";
 import { capitalize } from "../../util/stringUtil";
 
+const stage = process.env.ENV!.toLowerCase();
+
 /**
  * Creates an HTTP API.
  *
@@ -26,8 +28,7 @@ const createHttpApi = (scope: cdk.Stack, id: string) => {
     protocolType: "HTTP",
   });
 
-  const stage = process.env.ENV!;
-  new apigatewayv2.CfnStage(scope, `ChatAppHttpApiStage-${stage}`, {
+  new apigatewayv2.CfnStage(scope, `ChatAppHttpApiStage-${capitalize(stage)}`, {
     apiId: httpApi.ref,
     stageName: stage,
     autoDeploy: true,
@@ -52,8 +53,7 @@ const createWsApi = (scope: cdk.Stack, id: string) => {
     routeSelectionExpression: "$request.body.action",
   });
 
-  const stage = process.env.ENV!;
-  new apigatewayv2.CfnStage(scope, `ChatAppWsApiStage-${stage}`, {
+  new apigatewayv2.CfnStage(scope, `ChatAppWsApiStage-${capitalize(stage)}`, {
     apiId: wsApi.ref,
     stageName: stage,
     autoDeploy: true,
@@ -110,7 +110,7 @@ const createLambdaRoles = (
     "execute-api:ManageConnections",
   ];
   const wsApiResources = [
-    `arn:aws:execute-api:${scope.region}:${scope.account}:*/*/*`,
+    `arn:aws:execute-api:${scope.region}:${scope.account}:${props.wsApi.ref}/${stage}/*`,
   ];
 
   // create policies
@@ -234,11 +234,15 @@ const createLambdaFactory = (
   });
 };
 
-interface ApiStackPropsI extends cdk.StackProps {}
+interface ApiStackPropsI extends cdk.StackProps {
+  ddbTable: dynamodb.CfnTable;
+}
 
 export class ApiStack extends cdk.Stack {
   private httpApi: apigatewayv2.CfnApi;
   private wsApi: apigatewayv2.CfnApi;
+  private apiLambdaLayer: lambda.CfnLayerVersion;
+  private lambdas: { [name: string]: lambda.CfnFunction } = {};
 
   constructor(scope: cdk.Construct, id: string, props: ApiStackPropsI) {
     super(scope, id, props);
@@ -258,22 +262,78 @@ export class ApiStack extends cdk.Stack {
         "../../build/lib/api-stack/layer/chat-app-layer"
       ),
     });
+    ///////////////////////////////////////////////
+
+    // create the http api
+    this.httpApi = createHttpApi(this, "ChatAppHttpApi");
+
+    // create the ws api
+    this.wsApi = createWsApi(this, "ChatAppWsApi");
 
     ///////////////////////////////////////////////
     // Create lambdas
     ///////////////////////////////////////////////
+    // create lambda roles
+    const { dynamodbReadRole, dynamodbWriteRole } = createLambdaRoles(this, {
+      ddbTable: props.ddbTable,
+      wsApi: this.wsApi,
+    });
+
+    // create lambda layer
+    this.apiLambdaLayer = createApiLambdaLayer(this, { layerS3Assets });
+
     // create lambda factory
+    const lambdaFactory = createLambdaFactory(this, {
+      assetsZip: lambdaS3Assets,
+      ddbTable: props.ddbTable,
+      layers: [this.apiLambdaLayer],
+    });
 
+    // create lambdas
+    this.lambdas.addConnectionToChat = lambdaFactory(
+      "chat/addConnectionToChat.handler",
+      dynamodbWriteRole
+    );
+    this.lambdas.addUserToChat = lambdaFactory(
+      "chat/addUserToChat.handler",
+      dynamodbWriteRole
+    );
+    this.lambdas.createChat = lambdaFactory(
+      "chat/createChat.handler",
+      dynamodbWriteRole
+    );
+    this.lambdas.getChats = lambdaFactory(
+      "chat/getChats.handler",
+      dynamodbReadRole
+    );
+    this.lambdas.removeUserFromChat = lambdaFactory(
+      "chat/removeUserFromChat.handler",
+      dynamodbWriteRole
+    );
+    this.lambdas.updateChat = lambdaFactory(
+      "chat/updateChat.handler",
+      dynamodbWriteRole
+    );
+    this.lambdas.createContact = lambdaFactory(
+      "chat/createContact.handler",
+      dynamodbWriteRole
+    );
+    this.lambdas.deleteContact = lambdaFactory(
+      "chat/deleteContact.handler",
+      dynamodbWriteRole
+    );
+    this.lambdas.getContact = lambdaFactory(
+      "chat/getContact.handler",
+      dynamodbReadRole
+    );
+    this.lambdas.getContacts = lambdaFactory(
+      "chat/getContacts.handler",
+      dynamodbReadRole
+    );
+    this.lambdas.updateContact = lambdaFactory(
+      "chat/updateContact.handler",
+      dynamodbWriteRole
+    );
     ///////////////////////////////////////////////
-    // Configure HTTP API
-    ///////////////////////////////////////////////
-    // create the http api
-    this.httpApi = createHttpApi(this, "ChatAppHttpApi");
-
-    ///////////////////////////////////////////////
-    // Configure Websocket API
-    ///////////////////////////////////////////////
-    // create the ws api
-    this.wsApi = createWsApi(this, "ChatAppWsApi");
   }
 }

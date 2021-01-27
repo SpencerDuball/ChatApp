@@ -2,6 +2,9 @@ import * as cdk from "@aws-cdk/core";
 import * as cognito from "@aws-cdk/aws-cognito";
 import * as iam from "@aws-cdk/aws-iam";
 import * as ssm from "@aws-cdk/aws-ssm";
+import * as apigatewayv2 from "@aws-cdk/aws-apigatewayv2";
+
+const stage = process.env.ENV!.toLowerCase();
 
 /**
  * Creates a CfnUserPool construct.
@@ -101,7 +104,11 @@ const createIdentityPool = (
 const createAuthenticatedRoles = (
   scope: cdk.Stack,
   id: string,
-  props: { identityPool: cognito.CfnIdentityPool }
+  props: {
+    identityPool: cognito.CfnIdentityPool;
+    wsApi: apigatewayv2.CfnApi;
+    httpApi: apigatewayv2.CfnApi;
+  }
 ) =>
   new iam.CfnRole(scope, id, {
     assumeRolePolicyDocument: iam.PolicyDocument.fromJson({
@@ -130,11 +137,11 @@ const createAuthenticatedRoles = (
               Action: ["execute-api:*"],
               Resource: [
                 // http api
-                `arn:aws:execute-api:${scope.region}:${scope.account}:*/*/*/contact`,
-                `arn:aws:execute-api:${scope.region}:${scope.account}:*/*/*/contact/*`,
-                `arn:aws:execute-api:${scope.region}:${scope.account}:*/*/*/contacts`,
+                `arn:aws:execute-api:${scope.region}:${scope.account}:${props.httpApi.ref}/${stage}/*/contact`,
+                `arn:aws:execute-api:${scope.region}:${scope.account}:${props.httpApi.ref}/${stage}/*/contact/*`,
+                `arn:aws:execute-api:${scope.region}:${scope.account}:${props.httpApi.ref}/${stage}/*/contacts`,
                 // ws api
-                `arn:aws:execute-api:${scope.region}:${scope.account}:*/*`,
+                `arn:aws:execute-api:${scope.region}:${scope.account}:${props.wsApi.ref}/${stage}/*`,
               ],
             },
           ],
@@ -230,7 +237,10 @@ const storeParameterStoreValues = (
   });
 };
 
-interface AuthStackPropsI extends cdk.StackProps {}
+interface AuthStackPropsI extends cdk.StackProps {
+  wsApi: apigatewayv2.CfnApi;
+  httpApi: apigatewayv2.CfnApi;
+}
 
 export class AuthStack extends cdk.Stack {
   private userPool: cognito.CfnUserPool;
@@ -266,6 +276,8 @@ export class AuthStack extends cdk.Stack {
       "ChatAppAuthenticatedRole",
       {
         identityPool: this.identityPool,
+        wsApi: props.wsApi,
+        httpApi: props.httpApi,
       }
     );
 
