@@ -3,8 +3,7 @@ import * as cognito from "@aws-cdk/aws-cognito";
 import * as iam from "@aws-cdk/aws-iam";
 import * as ssm from "@aws-cdk/aws-ssm";
 import * as apigatewayv2 from "@aws-cdk/aws-apigatewayv2";
-
-const stage = process.env.ENV!.toLowerCase();
+import { stage } from "../globals";
 
 /**
  * Creates a CfnUserPool construct.

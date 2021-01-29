@@ -6,60 +6,46 @@ import * as path from "path";
 import * as iam from "@aws-cdk/aws-iam";
 import * as dynamodb from "@aws-cdk/aws-dynamodb";
 import { capitalize } from "../../util/stringUtil";
-
-const stage = process.env.ENV!.toLowerCase();
-
-/**
- * Creates an HTTP API.
- *
- * @param scope - scope in which this resource is defined.
- * @param id - scoped id of the resource.
- * @param props - the properties of the resource.
- */
-const createHttpApi = (scope: cdk.Stack, id: string) => {
-  const httpApi = new apigatewayv2.CfnApi(scope, id, {
-    corsConfiguration: {
-      allowOrigins: ["*"],
-      allowHeaders: ["*"],
-      allowMethods: ["*"],
-    },
-    description: "The HTTP API for ChatApp.",
-    name: "ChatAppHttpApi",
-    protocolType: "HTTP",
-  });
-
-  new apigatewayv2.CfnStage(scope, `ChatAppHttpApiStage-${capitalize(stage)}`, {
-    apiId: httpApi.ref,
-    stageName: stage,
-    autoDeploy: true,
-  });
-
-  return httpApi;
-};
+import { WsApi } from "./constructs/WsApi";
+import { HttpApi } from "./constructs/HttpApi";
+import { stage } from "../globals";
 
 /**
- * Creates a Websocket API.
- *
- * @param scope - scope in which this resource is defined.
- * @param id - scoped id of the resource.
- * @param props - the properties of the resource.
+ * Create the InvokeLambdaRole for WsApi and HttpApi.
+ * @param scope
+ * @param props
  */
-const createWsApi = (scope: cdk.Stack, id: string) => {
-  const wsApi = new apigatewayv2.CfnApi(scope, id, {
-    apiKeySelectionExpression: "$request.header.x-api-key",
-    description: "The Websocket API for ChatApp.",
-    name: "ChatAppWsApi",
-    protocolType: "WEBSOCKET",
-    routeSelectionExpression: "$request.body.action",
-  });
+const createInvokeLambdaRole = (
+  scope: cdk.Stack,
+  lambdas: lambda.CfnFunction[]
+) => {
+  // create policy
+  const invokeLambdaPolicy = {
+    policyName: "ChatAppInvokeLambdaPolicy",
+    policyDocument: iam.PolicyDocument.fromJson({
+      Statement: [
+        {
+          Effect: "Allow",
+          Action: ["lambda:InvokeFunction"],
+          Resource: Object.values(lambdas).map((lambda) => lambda.attrArn),
+        },
+      ],
+    }),
+  };
 
-  new apigatewayv2.CfnStage(scope, `ChatAppWsApiStage-${capitalize(stage)}`, {
-    apiId: wsApi.ref,
-    stageName: stage,
-    autoDeploy: true,
+  // create & return role
+  return new iam.CfnRole(scope, "ChatAppInvokeLambdaRole", {
+    assumeRolePolicyDocument: iam.PolicyDocument.fromJson({
+      Statement: [
+        {
+          Effect: "Allow",
+          Principal: { Service: ["apigateway.amazonaws.com"] },
+          Action: ["sts:AssumeRole"],
+        },
+      ],
+    }),
+    policies: [invokeLambdaPolicy],
   });
-
-  return wsApi;
 };
 
 /**
@@ -182,11 +168,15 @@ const createApiLambdaLayer = (
       layerName: "ComputeServiceLambdaLayer",
     }
   );
-  new lambda.CfnLayerVersionPermission(scope, "ChatAppApiLambdaLayer", {
-    action: "lambda:GetLayerVersion",
-    layerVersionArn: computeServiceLambdaLayer.ref,
-    principal: scope.account,
-  });
+  new lambda.CfnLayerVersionPermission(
+    scope,
+    "ChatAppApiLambdaLayerPermission",
+    {
+      action: "lambda:GetLayerVersion",
+      layerVersionArn: computeServiceLambdaLayer.ref,
+      principal: scope.account,
+    }
+  );
 
   return computeServiceLambdaLayer;
 };
@@ -204,16 +194,10 @@ const createLambdaFactory = (
     ddbTable: dynamodb.CfnTable;
     layers: lambda.CfnLayerVersion[];
   }
-) => (handler: string, role: iam.CfnRole) => {
+) => (name: string, handler: string, role: iam.CfnRole) => {
   // construct construct id
   // handler should have name = myFunction.handler
-  const id =
-    "ChatApp" +
-    handler
-      .split(".") // split into components ["myFunction", "handler"]
-      .shift()! // return "myFunction"
-      .replace(/\w/, (word) => word.toUpperCase()) + // capitalize "MyFunction"
-    "Lambda";
+  const id = `ChatApp${name}Lambda`;
 
   return new lambda.CfnFunction(scope, id, {
     code: {
@@ -239,8 +223,8 @@ interface ApiStackPropsI extends cdk.StackProps {
 }
 
 export class ApiStack extends cdk.Stack {
-  private httpApi: apigatewayv2.CfnApi;
-  private wsApi: apigatewayv2.CfnApi;
+  public httpApi: HttpApi;
+  public wsApi: WsApi;
   private apiLambdaLayer: lambda.CfnLayerVersion;
   private lambdas: { [name: string]: lambda.CfnFunction } = {};
 
@@ -257,18 +241,15 @@ export class ApiStack extends cdk.Stack {
 
     // upload lambda layer assets
     const layerS3Assets = new assets.Asset(this, "ChatAppLayerAssets", {
-      path: path.join(
-        __dirname,
-        "../../build/lib/api-stack/layer/chat-app-layer"
-      ),
+      path: path.join(__dirname, "./layers/chat-app-layer"),
     });
     ///////////////////////////////////////////////
 
     // create the http api
-    this.httpApi = createHttpApi(this, "ChatAppHttpApi");
+    this.httpApi = new HttpApi(this, "ChatAppHttpApi");
 
     // create the ws api
-    this.wsApi = createWsApi(this, "ChatAppWsApi");
+    this.wsApi = new WsApi(this, "ChatAppWsApi");
 
     ///////////////////////////////////////////////
     // Create lambdas
@@ -291,49 +272,117 @@ export class ApiStack extends cdk.Stack {
 
     // create lambdas
     this.lambdas.addConnectionToChat = lambdaFactory(
-      "chat/addConnectionToChat.handler",
+      "AddConnectionToChat",
+      "addConnectionToChat.handler",
       dynamodbWriteRole
     );
     this.lambdas.addUserToChat = lambdaFactory(
-      "chat/addUserToChat.handler",
+      "AddUserToChat",
+      "addUserToChat.handler",
+      dynamodbWriteRole
+    );
+    this.lambdas.connect = lambdaFactory(
+      "Connect",
+      "connect.handler",
       dynamodbWriteRole
     );
     this.lambdas.createChat = lambdaFactory(
-      "chat/createChat.handler",
+      "CreateChat",
+      "createChat.handler",
+      dynamodbWriteRole
+    );
+    this.lambdas.disconnect = lambdaFactory(
+      "Disconnect",
+      "disconnect.handler",
       dynamodbWriteRole
     );
     this.lambdas.getChats = lambdaFactory(
-      "chat/getChats.handler",
+      "GetChats",
+      "getChats.handler",
       dynamodbReadRole
     );
     this.lambdas.removeUserFromChat = lambdaFactory(
-      "chat/removeUserFromChat.handler",
+      "RemoveUserFromChat",
+      "removeUserFromChat.handler",
       dynamodbWriteRole
     );
     this.lambdas.updateChat = lambdaFactory(
-      "chat/updateChat.handler",
+      "UpdateChat",
+      "updateChat.handler",
       dynamodbWriteRole
     );
     this.lambdas.createContact = lambdaFactory(
-      "chat/createContact.handler",
+      "CreateContact",
+      "createContact.handler",
       dynamodbWriteRole
     );
     this.lambdas.deleteContact = lambdaFactory(
-      "chat/deleteContact.handler",
+      "DeleteContact",
+      "deleteContact.handler",
       dynamodbWriteRole
     );
     this.lambdas.getContact = lambdaFactory(
-      "chat/getContact.handler",
+      "GetContact",
+      "getContact.handler",
       dynamodbReadRole
     );
     this.lambdas.getContacts = lambdaFactory(
-      "chat/getContacts.handler",
+      "GetContacts",
+      "getContacts.handler",
       dynamodbReadRole
     );
     this.lambdas.updateContact = lambdaFactory(
-      "chat/updateContact.handler",
+      "UpdateContact",
+      "updateContact.handler",
       dynamodbWriteRole
     );
     ///////////////////////////////////////////////
+
+    // create role for WsApi & HttpApi to invoke lambdas
+    const invokeLambdaRole = createInvokeLambdaRole(
+      this,
+      Object.values(this.lambdas)
+    );
+
+    ///////////////////////////////////////////////
+    // Create routes & integrations
+    ///////////////////////////////////////////////
+    this.wsApi.createConnectRoute(this.lambdas.connect, invokeLambdaRole);
+    this.wsApi.createDisconnectRoute(this.lambdas.disconnect, invokeLambdaRole);
+    this.wsApi.createRoute(
+      "deleteContact",
+      this.lambdas.deleteContact,
+      invokeLambdaRole
+    );
+    this.wsApi.createRoute(
+      "updateContact",
+      this.lambdas.updateContact,
+      invokeLambdaRole
+    );
+    this.wsApi.createRoute(
+      "createContact",
+      this.lambdas.createContact,
+      invokeLambdaRole
+    );
+    this.wsApi.createRoute(
+      "createChat",
+      this.lambdas.createChat,
+      invokeLambdaRole
+    );
+    this.wsApi.createRoute(
+      "updateChat",
+      this.lambdas.updateChat,
+      invokeLambdaRole
+    );
+    this.wsApi.createRoute(
+      "addUserToChat",
+      this.lambdas.addUserToChat,
+      invokeLambdaRole
+    );
+    this.wsApi.createRoute(
+      "addConnectionToChat",
+      this.lambdas.addConnectionToChat,
+      invokeLambdaRole
+    );
   }
 }
