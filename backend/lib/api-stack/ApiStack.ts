@@ -27,7 +27,7 @@ const createInvokeLambdaRole = (
         {
           Effect: "Allow",
           Action: ["lambda:InvokeFunction"],
-          Resource: Object.values(lambdas).map((lambda) => lambda.attrArn),
+          Resource: lambdas.map((lambda) => lambda.attrArn),
         },
       ],
     }),
@@ -187,22 +187,28 @@ const createApiLambdaLayer = (
  * @param scope - scope in which this resource is defined.
  * @param props - scoped id of the resource.
  */
-const createLambdaFactory = (
+const createLambda = (
   scope: cdk.Stack,
   props: {
-    assetsZip: assets.Asset;
+    name: string;
+    pathToFile: string;
     ddbTable: dynamodb.CfnTable;
     layers: lambda.CfnLayerVersion[];
+    role: iam.CfnRole;
   }
-) => (name: string, handler: string, role: iam.CfnRole) => {
+) => {
   // construct construct id
   // handler should have name = myFunction.handler
-  const id = `ChatApp${name}Lambda`;
+  const id = `ChatApp${props.name}Lambda`;
+  // upload lambda assets
+  const lambdaS3Asset = new assets.Asset(scope, `${id}Asset`, {
+    path: props.pathToFile,
+  });
 
   return new lambda.CfnFunction(scope, id, {
     code: {
-      s3Bucket: props.assetsZip.s3BucketName,
-      s3Key: props.assetsZip.s3ObjectKey,
+      s3Bucket: lambdaS3Asset.s3BucketName,
+      s3Key: lambdaS3Asset.s3ObjectKey,
     },
     environment: {
       variables: {
@@ -211,9 +217,9 @@ const createLambdaFactory = (
       },
     },
     layers: props.layers.map((layer) => layer.ref),
-    handler,
+    handler: "index.handler",
     runtime: "nodejs12.x",
-    role: role.attrArn,
+    role: props.role.attrArn,
     functionName: id,
   });
 };
@@ -231,19 +237,10 @@ export class ApiStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props: ApiStackPropsI) {
     super(scope, id, props);
 
-    ///////////////////////////////////////////////
-    // Upload assets
-    ///////////////////////////////////////////////
-    // upload lambda assets
-    const lambdaS3Assets = new assets.Asset(this, "ChatAppLambdaAssets", {
-      path: path.join(__dirname, "../../build/lib/api-stack/lambda"),
-    });
-
     // upload lambda layer assets
     const layerS3Assets = new assets.Asset(this, "ChatAppLayerAssets", {
       path: path.join(__dirname, "./layers/chat-app-layer"),
     });
-    ///////////////////////////////////////////////
 
     // create the http api
     this.httpApi = new HttpApi(this, "ChatAppHttpApi");
@@ -263,80 +260,138 @@ export class ApiStack extends cdk.Stack {
     // create lambda layer
     this.apiLambdaLayer = createApiLambdaLayer(this, { layerS3Assets });
 
-    // create lambda factory
-    const lambdaFactory = createLambdaFactory(this, {
-      assetsZip: lambdaS3Assets,
+    // create chat lambdas
+    ///////////////////////////////////////////////
+    this.lambdas.addConnectionToChat = createLambda(this, {
+      name: "AddConnectionToChat",
+      pathToFile: path.join(
+        __dirname,
+        "../../build/lib/api-stack/lambda/addConnectionToChat"
+      ),
       ddbTable: props.ddbTable,
       layers: [this.apiLambdaLayer],
+      role: dynamodbWriteRole,
     });
-
-    // create lambdas
-    this.lambdas.addConnectionToChat = lambdaFactory(
-      "AddConnectionToChat",
-      "addConnectionToChat.handler",
-      dynamodbWriteRole
-    );
-    this.lambdas.addUserToChat = lambdaFactory(
-      "AddUserToChat",
-      "addUserToChat.handler",
-      dynamodbWriteRole
-    );
-    this.lambdas.connect = lambdaFactory(
-      "Connect",
-      "connect.handler",
-      dynamodbWriteRole
-    );
-    this.lambdas.createChat = lambdaFactory(
-      "CreateChat",
-      "createChat.handler",
-      dynamodbWriteRole
-    );
-    this.lambdas.disconnect = lambdaFactory(
-      "Disconnect",
-      "disconnect.handler",
-      dynamodbWriteRole
-    );
-    this.lambdas.getChats = lambdaFactory(
-      "GetChats",
-      "getChats.handler",
-      dynamodbReadRole
-    );
-    this.lambdas.removeUserFromChat = lambdaFactory(
-      "RemoveUserFromChat",
-      "removeUserFromChat.handler",
-      dynamodbWriteRole
-    );
-    this.lambdas.updateChat = lambdaFactory(
-      "UpdateChat",
-      "updateChat.handler",
-      dynamodbWriteRole
-    );
-    this.lambdas.createContact = lambdaFactory(
-      "CreateContact",
-      "createContact.handler",
-      dynamodbWriteRole
-    );
-    this.lambdas.deleteContact = lambdaFactory(
-      "DeleteContact",
-      "deleteContact.handler",
-      dynamodbWriteRole
-    );
-    this.lambdas.getContact = lambdaFactory(
-      "GetContact",
-      "getContact.handler",
-      dynamodbReadRole
-    );
-    this.lambdas.getContacts = lambdaFactory(
-      "GetContacts",
-      "getContacts.handler",
-      dynamodbReadRole
-    );
-    this.lambdas.updateContact = lambdaFactory(
-      "UpdateContact",
-      "updateContact.handler",
-      dynamodbWriteRole
-    );
-    ///////////////////////////////////////////////
+    this.lambdas.addUserToChat = createLambda(this, {
+      name: "AddUserToChat",
+      pathToFile: path.join(
+        __dirname,
+        "../../build/lib/api-stack/lambda/addUserToChat"
+      ),
+      ddbTable: props.ddbTable,
+      layers: [this.apiLambdaLayer],
+      role: dynamodbWriteRole,
+    });
+    this.lambdas.connect = createLambda(this, {
+      name: "Connect",
+      pathToFile: path.join(
+        __dirname,
+        "../../build/lib/api-stack/lambda/connect"
+      ),
+      ddbTable: props.ddbTable,
+      layers: [this.apiLambdaLayer],
+      role: dynamodbWriteRole,
+    });
+    this.lambdas.createChat = createLambda(this, {
+      name: "CreateChat",
+      pathToFile: path.join(
+        __dirname,
+        "../../build/lib/api-stack/lambda/createChat"
+      ),
+      ddbTable: props.ddbTable,
+      layers: [this.apiLambdaLayer],
+      role: dynamodbWriteRole,
+    });
+    this.lambdas.createContact = createLambda(this, {
+      name: "CreateContact",
+      pathToFile: path.join(
+        __dirname,
+        "../../build/lib/api-stack/lambda/createChat"
+      ),
+      ddbTable: props.ddbTable,
+      layers: [this.apiLambdaLayer],
+      role: dynamodbWriteRole,
+    });
+    this.lambdas.deleteContact = createLambda(this, {
+      name: "DeleteContact",
+      pathToFile: path.join(
+        __dirname,
+        "../../build/lib/api-stack/lambda/deleteContact"
+      ),
+      ddbTable: props.ddbTable,
+      layers: [this.apiLambdaLayer],
+      role: dynamodbWriteRole,
+    });
+    this.lambdas.disconnect = createLambda(this, {
+      name: "Disconnect",
+      pathToFile: path.join(
+        __dirname,
+        "../../build/lib/api-stack/lambda/disconnect"
+      ),
+      ddbTable: props.ddbTable,
+      layers: [this.apiLambdaLayer],
+      role: dynamodbWriteRole,
+    });
+    this.lambdas.getChats = createLambda(this, {
+      name: "GetChats",
+      pathToFile: path.join(
+        __dirname,
+        "../../build/lib/api-stack/lambda/getChats"
+      ),
+      ddbTable: props.ddbTable,
+      layers: [this.apiLambdaLayer],
+      role: dynamodbReadRole,
+    });
+    this.lambdas.getContact = createLambda(this, {
+      name: "GetContact",
+      pathToFile: path.join(
+        __dirname,
+        "../../build/lib/api-stack/lambda/getContact"
+      ),
+      ddbTable: props.ddbTable,
+      layers: [this.apiLambdaLayer],
+      role: dynamodbReadRole,
+    });
+    this.lambdas.getContacts = createLambda(this, {
+      name: "GetContacts",
+      pathToFile: path.join(
+        __dirname,
+        "../../build/lib/api-stack/lambda/getContacts"
+      ),
+      ddbTable: props.ddbTable,
+      layers: [this.apiLambdaLayer],
+      role: dynamodbReadRole,
+    });
+    this.lambdas.removeUserFromChat = createLambda(this, {
+      name: "RemoveUserFromChat",
+      pathToFile: path.join(
+        __dirname,
+        "../../build/lib/api-stack/lambda/removeUserFromChat"
+      ),
+      ddbTable: props.ddbTable,
+      layers: [this.apiLambdaLayer],
+      role: dynamodbWriteRole,
+    });
+    this.lambdas.updateChat = createLambda(this, {
+      name: "UpdateChat",
+      pathToFile: path.join(
+        __dirname,
+        "../../build/lib/api-stack/lambda/updateChat"
+      ),
+      ddbTable: props.ddbTable,
+      layers: [this.apiLambdaLayer],
+      role: dynamodbWriteRole,
+    });
+    this.lambdas.updateContact = createLambda(this, {
+      name: "UpdateContact",
+      pathToFile: path.join(
+        __dirname,
+        "../../build/lib/api-stack/lambda/updateContact"
+      ),
+      ddbTable: props.ddbTable,
+      layers: [this.apiLambdaLayer],
+      role: dynamodbWriteRole,
+    });
 
     // create role for WsApi & HttpApi to invoke lambdas
     const invokeLambdaRole = createInvokeLambdaRole(
