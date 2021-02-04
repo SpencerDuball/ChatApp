@@ -32,14 +32,28 @@ export class HttpApi extends apigatewayv2.CfnApi {
     );
   }
 
-  public createRoute(route: string, lambda: lambda.CfnFunction) {
+  public createRoute(
+    id: string,
+    routeKey: string,
+    lambda: lambda.CfnFunction,
+    role: iam.CfnRole
+  ) {
     const integration = new apigatewayv2.CfnIntegration(
       this.stack,
-      `ChatAppHttpApi${capitalize(route)}Integration`,
+      `ChatAppHttpApi${id}Integration`,
       {
         apiId: this.ref,
+        credentialsArn: role.attrArn,
         integrationType: "AWS_PROXY",
+        integrationUri: `arn:aws:apigateway:${this.stack.region}:lambda:path/2015-03-31/functions/${lambda.attrArn}/invocations`,
+        payloadFormatVersion: "2.0",
       }
     );
+    new apigatewayv2.CfnRoute(this.stack, `ChatAppHttpApi${id}Route`, {
+      apiId: this.ref,
+      authorizationType: "AWS_IAM",
+      routeKey: routeKey, // ex: "GET /pets"
+      target: `integrations/${integration.ref}`,
+    });
   }
 }

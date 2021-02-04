@@ -439,5 +439,23 @@ export class ApiStack extends cdk.Stack {
       this.lambdas.addConnectionToChat,
       invokeLambdaRole
     );
+    this.httpApi.createRoute(
+      "GetContacts",
+      "GET /contacts",
+      this.lambdas.getContacts,
+      invokeLambdaRole
+    );
+    this.httpApi.createRoute(
+      "GetContact",
+      "GET /contact/{id}",
+      this.lambdas.getContact,
+      invokeLambdaRole
+    );
+    this.httpApi.createRoute(
+      "GetChats",
+      "GET /chats",
+      this.lambdas.getChats,
+      invokeLambdaRole
+    );
   }
 }
