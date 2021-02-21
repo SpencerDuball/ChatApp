@@ -228,20 +228,6 @@ const storeParameterStoreValues = (
     type: "String",
     value: props.identityPool.ref,
   });
-  const USERNAME = "spencerduball@gmail.com";
-  const PASSWORD = "password";
-  new ssm.CfnParameter(scope, "ChatAppSSM-Test-TestCognitoUsername", {
-    description: "The username of the test cognito user.",
-    name: "/ChatApp/test/username",
-    type: "String",
-    value: USERNAME,
-  });
-  new ssm.CfnParameter(scope, "ChatAppSSM-Test-TestCognitoPassword", {
-    description: "The password of the test cognito user.",
-    name: "/ChatApp/test/password",
-    type: "String",
-    value: PASSWORD,
-  });
 };
 
 interface AuthStackPropsI extends cdk.StackProps {

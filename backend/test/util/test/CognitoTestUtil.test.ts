@@ -11,11 +11,9 @@ import * as dotenv from "dotenv";
 dotenv.config();
 const requiredEnvVariables = [
   "IDENTITY_POOL_ID",
-  "PASSWORD",
   "REGION",
   "USER_POOL_CLIENT_ID",
   "USER_POOL_ID",
-  "USERNAME",
 ];
 const envVariables = getEnvVariables(requiredEnvVariables) as {
   IDENTITY_POOL_ID: string;
@@ -34,30 +32,50 @@ const cognito = new CognitoTestUtil({
   identityPoolId: envVariables.IDENTITY_POOL_ID,
 });
 
-test("doesUserExist returns false when user does not exist", async () => {
-  // make sure user doesn't exist
-  const idpClient = new CognitoIdentityProviderClient({
-    region: process.env.REGION,
+describe("doesUserExist(): ", () => {
+  test("returns false when user does not exist", async () => {
+    await expect(
+      cognito.doesUserExist("non-existant-user@fake.com")
+    ).resolves.toEqual(false);
   });
-  try {
-    // check if user exists (will throw error if doesn't)
-    await idpClient.send(
-      new AdminGetUserCommand({
-        UserPoolId: envVariables.USER_POOL_ID,
-        Username: envVariables.USERNAME,
-      })
-    );
 
-    // if user exists, delete user and proceed
-    await idpClient.send(
-      new AdminDeleteUserCommand({
-        UserPoolId: envVariables.USER_POOL_ID,
-        Username: envVariables.USERNAME,
-      })
-    );
-  } catch (error) {} // do nothing, user doesn't exist already
+  test("throws error when CognitoTestUtil is configured incorrectly", async () => {
+    const invalidCognito = new CognitoTestUtil({
+      region: envVariables.REGION,
+      userPoolId: "invalid_user_pool_id",
+      userPoolClientId: envVariables.USER_POOL_CLIENT_ID,
+      identityPoolId: envVariables.IDENTITY_POOL_ID,
+    });
 
-  await expect(cognito.doesUserExist(envVariables.USERNAME)).resolves.toEqual(
-    false
-  );
+    await expect(
+      invalidCognito.doesUserExist("non-existant-user@fake.com")
+    ).rejects.toThrow(Error);
+  });
+
+  test("returns true when user does exist", async () => {
+    const idpClient = new CognitoIdentityProviderClient({
+      region: envVariables.REGION,
+    });
+    const testUser = {
+      username: "ben-bork@test.com",
+      password: "password",
+    };
+
+    try {
+      // check if user exists
+      const user = idpClient.send(
+        new AdminGetUserCommand({
+          UserPoolId: envVariables.USER_POOL_ID,
+          Username: "ben-bork@test.com",
+        })
+      );
+    } catch (error) {
+      // if error thrown, make sure it is "UserNotFoundException", else throw again
+      // this prevents errors such as "ResourceNotFoundException", "NotAuthorizedException", etc
+      // from being interpreted as a missing user instead of an invalid request
+      if (error.name === "UserNotFoundException") {
+        // if not found create the user
+      } else throw error;
+    }
+  });
 });

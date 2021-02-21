@@ -1,6 +1,7 @@
 import {
   CognitoIdentityProviderClient,
   AdminGetUserCommand,
+  AdminGetUserCommandOutput,
 } from "@aws-sdk/client-cognito-identity-provider";
 
 interface CognitoTestUtilPropsI {
@@ -35,14 +36,24 @@ export class CognitoTestUtil {
     });
 
     try {
-      const user = await idpClient.send(
+      // get the user, throws if no user
+      await idpClient.send(
         new AdminGetUserCommand({
           UserPoolId: this.userPoolId,
           Username: username,
         })
       );
+
+      // user does exist, return true
+      return true;
     } catch (error) {
-      console.log(error);
+      // if error thrown, make sure it is "UserNotFoundException", else throw again
+      // this prevents errors such as "ResourceNotFoundException", "NotAuthorizedException", etc
+      // from being interpreted as a missing user instead of an invalid request
+      if (error.name === "UserNotFoundException") {
+        // user does not exist, return false
+        return false;
+      } else throw error;
     }
   }
 }
