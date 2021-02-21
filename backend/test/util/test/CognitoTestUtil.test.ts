@@ -4,10 +4,8 @@ import {
 } from "@aws-sdk/client-cognito-identity-provider";
 import { CognitoTestUtil } from "../../../util/test/CognitoTestUtil";
 import { getEnvVariables } from "../../../util/test/getEnvVariables";
-import * as dotenv from "dotenv";
 
 // configure environment variables
-dotenv.config();
 const requiredEnvVariables = [
   "IDENTITY_POOL_ID",
   "REGION",

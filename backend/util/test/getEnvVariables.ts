@@ -1,3 +1,8 @@
+import * as dotenv from "dotenv";
+
+// configure environment variables
+dotenv.config();
+
 /**
  * Gets a map of environment variables.
  *
