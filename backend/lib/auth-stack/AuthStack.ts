@@ -16,7 +16,7 @@ const createUserPool = (scope: cdk.Stack, id: string) =>
     accountRecoverySetting: {
       recoveryMechanisms: [{ name: "verified_email", priority: 1 }],
     },
-    aliasAttributes: ["preferred_username", "email"],
+    aliasAttributes: ["email"],
     autoVerifiedAttributes: ["email"],
     emailConfiguration: {
       emailSendingAccount: "COGNITO_DEFAULT",
@@ -35,8 +35,7 @@ const createUserPool = (scope: cdk.Stack, id: string) =>
     schema: [
       {
         attributeDataType: "String",
-        mutable: false,
-        name: "preferred_username",
+        name: "email",
         required: true,
       },
     ],

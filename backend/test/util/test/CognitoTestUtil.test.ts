@@ -1,7 +1,6 @@
 import {
   CognitoIdentityProviderClient,
-  AdminGetUserCommand,
-  AdminDeleteUserCommand,
+  AdminCreateUserCommand,
 } from "@aws-sdk/client-cognito-identity-provider";
 import { CognitoTestUtil } from "../../../util/test/CognitoTestUtil";
 import { getEnvVariables } from "../../../util/test/getEnvVariables";
@@ -36,7 +35,7 @@ describe("doesUserExist(): ", () => {
   test("returns false when user does not exist", async () => {
     await expect(
       cognito.doesUserExist("non-existant-user@fake.com")
-    ).resolves.toEqual(false);
+    ).resolves.toBeFalsy();
   });
 
   test("throws error when CognitoTestUtil is configured incorrectly", async () => {
@@ -57,25 +56,34 @@ describe("doesUserExist(): ", () => {
       region: envVariables.REGION,
     });
     const testUser = {
-      username: "ben-bork@test.com",
+      username: "bbork",
+      email: "ben-bork@test.com",
       password: "password",
     };
 
     try {
-      // check if user exists
-      const user = idpClient.send(
-        new AdminGetUserCommand({
+      // ensure the user exists by trying to create the user. An error will throw if the user
+      // already exists.
+      await idpClient.send(
+        new AdminCreateUserCommand({
           UserPoolId: envVariables.USER_POOL_ID,
-          Username: "ben-bork@test.com",
+          Username: testUser.username,
+          UserAttributes: [
+            { Name: "email", Value: testUser.email },
+            { Name: "email_verified", Value: "True" },
+          ],
+          MessageAction: "SUPPRESS",
         })
       );
     } catch (error) {
-      // if error thrown, make sure it is "UserNotFoundException", else throw again
+      // if error thrown, make sure it is "UserExistsException", else throw again
       // this prevents errors such as "ResourceNotFoundException", "NotAuthorizedException", etc
-      // from being interpreted as a missing user instead of an invalid request
-      if (error.name === "UserNotFoundException") {
-        // if not found create the user
-      } else throw error;
+      // from being interpreted as trying to create an existing user
+      if (error.name !== "UserExistsException") throw error;
     }
+
+    await expect(
+      cognito.doesUserExist(testUser.username)
+    ).resolves.toBeTruthy();
   });
 });
