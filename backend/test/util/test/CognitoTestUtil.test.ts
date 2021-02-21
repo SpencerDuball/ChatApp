@@ -79,7 +79,7 @@ describe("doesUserExist(): ", () => {
       // if error thrown, make sure it is "UserExistsException", else throw again
       // this prevents errors such as "ResourceNotFoundException", "NotAuthorizedException", etc
       // from being interpreted as trying to create an existing user
-      if (error.name !== "UserExistsException") throw error;
+      if (error.name !== "UsernameExistsException") throw error;
     }
 
     await expect(
